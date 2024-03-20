@@ -1,4 +1,5 @@
 #pragma once
+#include "ImGuiLayer.h"
 
 class Application
 {
@@ -17,4 +18,6 @@ public:
 private:
 
 	static Application s_Instance;
+
+	ImGuiLayer m_ImGuiLayer;
 };
