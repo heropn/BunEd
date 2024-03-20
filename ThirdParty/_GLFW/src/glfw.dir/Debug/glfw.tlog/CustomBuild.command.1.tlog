@@ -1,0 +1,10 @@
+^D:\VISUAL STUDIO C++ PROJECTS\BUNED\THIRDPARTY\GLFW\SRC\CMAKELISTS.TXT
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" "-SD:/Visual Studio C++ Projects/BunEd/ThirdParty/GLFW" "-BD:/Visual Studio C++ Projects/BunEd/ThirdParty/GLFW" --check-stamp-file "D:/Visual Studio C++ Projects/BunEd/ThirdParty/GLFW/src/CMakeFiles/generate.stamp"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
