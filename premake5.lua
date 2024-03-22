@@ -44,8 +44,6 @@ project "BunEd"
 	{
 		"%{prj.name}/Source/**.h",
 		"%{prj.name}/Source/**.cpp",
-		"ThirdParty/imgui/backends/imgui_impl_opengl3.cpp",
-		"ThirdParty/imgui/backends/imgui_impl_glfw.cpp",
 		"ThirdParty/_glm/util/glm.natvis"
 	}
 	

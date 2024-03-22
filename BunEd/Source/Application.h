@@ -1,5 +1,5 @@
 #pragma once
-#include "ImGuiLayer.h"
+#include "ImGui/ImGuiLayer.h"
 
 class Application
 {
@@ -20,4 +20,6 @@ private:
 	static Application s_Instance;
 
 	ImGuiLayer m_ImGuiLayer;
+
+	float m_DeltaTime = 0.0f;
 };

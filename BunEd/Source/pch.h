@@ -6,5 +6,6 @@
 #include "glm/ext.hpp"
 
 #include "Window.h"
+#include "Events/Event.h"
 
-#include <Windows.h>
+#include <algorithm>

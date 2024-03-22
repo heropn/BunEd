@@ -2,6 +2,7 @@
 #include "Application.h"
 #include "imgui.h"
 #include "Renderer.h"
+#include <chrono>
 
 Application Application::s_Instance;
 
@@ -26,8 +27,11 @@ void Application::Run()
 {
 	bool show_demo_window = true;
 
+
 	while (!Window::Get().RequestingClose())
 	{
+		std::chrono::time_point<std::chrono::steady_clock> time = std::chrono::steady_clock::now();
+
 		Window::Get().PollEvents();
 
 		m_ImGuiLayer.PreRender();
@@ -42,6 +46,8 @@ void Application::Run()
 		m_ImGuiLayer.PostRender();
 
 		Renderer::Get().SwapBuffers();
+
+		m_DeltaTime = std::chrono::duration_cast<std::chrono::duration<float>>(std::chrono::steady_clock::now() - time).count();
 	}
 }
 
