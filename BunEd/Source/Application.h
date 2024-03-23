@@ -13,6 +13,8 @@ public:
 	void Run();
 	void Shutdown();
 
+	void OnWindowResize(int width, int height);
+
 	static Application& Get() { return s_Instance; }
 
 private:

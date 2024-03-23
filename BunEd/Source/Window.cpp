@@ -85,6 +85,6 @@ void Window::BindToCallbacks()
 
 	glfwSetErrorCallback([](int error_code, const char* description)
 		{
-			printf("ERROR [GLFW]: %d - %s", error_code, description);
+			printf("ERROR [GLFW]: %d - %s\n", error_code, description);
 		});
 }
