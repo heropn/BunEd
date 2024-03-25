@@ -3,6 +3,8 @@
 #include "glad/glad.h"
 #include "Scenes/Scene.h"
 #include "GameObjects/GameObject.h"
+#include "Shader.h"
+#include "Mesh/Mesh.h"
 
 Renderer Renderer::s_Instance;
 
@@ -34,8 +36,8 @@ bool Renderer::Init(int width, int height)
 #endif
 
 	glEnable(GL_DEPTH_TEST);
-	//glEnable(GL_CULL_FACE);
-	//glCullFace(GL_CCW);
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_CCW);
 
 	ChangeViewportSize(width, height);
 
@@ -51,6 +53,17 @@ void Renderer::Render(const std::shared_ptr<Scene>& scene)
 {
 	glm::mat4x4 PVMatrix = scene->GetProjViewMatrix();
 	const std::vector<std::shared_ptr<GameObject>>& gameObjects = scene->GetGameObjects();
+
+	for (const auto& gameObj : gameObjects)
+	{
+		std::shared_ptr<Shader> shader = gameObj->GetShader();
+
+		shader->Bind();
+		shader->SetUniformMatrix4f("u_Model", gameObj->GetTransform());
+		shader->SetUniformMatrix4f("u_PV", PVMatrix);
+
+		gameObj->GetMesh()->Draw();
+	}
 }
 
 void Renderer::Clear()

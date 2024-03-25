@@ -1,18 +1,28 @@
 #pragma once
 #include <memory>
+#include "glm/glm.hpp"
 
-class Material;
+class Shader;
+class Mesh;
 
 class GameObject
 {
 public:
 
-	GameObject() = default;
+	GameObject();
 
-	void SetMaterial(const std::shared_ptr<Material>& mat) { m_Material = mat; }
-	std::shared_ptr<Material> GetMaterial() const { return m_Material; }
+	void SetShader(const std::shared_ptr<Shader>& shader) { m_Shader = shader; }
+	std::shared_ptr<Shader> GetShader() const { return m_Shader; }
+
+	void SetMesh(const std::shared_ptr<Mesh>& mesh) { m_Mesh = mesh; }
+	std::shared_ptr<Mesh> GetMesh() const { return m_Mesh; }
+
+	const glm::mat4x4& GetTransform() const { return m_Transform; }
 
 private:
 
-	std::shared_ptr<Material> m_Material = nullptr;
+	glm::mat4x4 m_Transform;
+
+	std::shared_ptr<Shader> m_Shader = nullptr;
+	std::shared_ptr<Mesh> m_Mesh = nullptr;
 };

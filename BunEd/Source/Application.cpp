@@ -46,31 +46,6 @@ void Application::Run()
 	Renderer& renderer = Renderer::Get();
 	Window& window = Window::Get();
 
-	float vertices[] = {
-		-0.5f, -0.5f, 0.0f, 0.0f, 1.0f,
-		 0.5f, -0.5f, 0.0f, 1.0f, 1.0f,
-		 0.5f,  0.5f, 0.0f, 1.0f, 0.0f,
-		-0.5f,  0.5f, 0.0f, 0.0f, 0.0f
-	};
-
-	uint16_t indicies[] = {
-		0, 1, 2,
-		2, 3, 0
-	};
-
-	VertexBuffer vbo(vertices, 5 * 4 * sizeof(float));
-	IndexBuffer ibo(indicies, 6 * sizeof(uint16_t));
-	VertexBufferLayout layout;
-	layout.Push(3, GL_FLOAT, GL_FALSE);
-	layout.Push(2, GL_FLOAT, GL_FALSE);
-
-	std::shared_ptr<Texture2D> tex = std::make_shared<Texture2D>("Assets/Models/Spider/SpiderTex.jpg");
-
-	VertexArray vao;
-	vao.AddBuffer(vbo, layout, ibo);
-
-	std::shared_ptr<Mesh> mesh = Mesh::CreateMesh("Assets/Models/Spider/spider.obj");
-
 	while (!window.RequestingClose())
 	{
 		std::chrono::time_point<std::chrono::steady_clock> time = std::chrono::steady_clock::now();
@@ -87,18 +62,6 @@ void Application::Run()
 			ImGui::ShowDemoWindow(&show_demo_window);
 
 		m_ImGuiLayer.Render();
-
-		{
-			std::shared_ptr<Shader> shader = ShadersManager::Get().GetShader(ShaderType::Default);
-			shader->Bind();
-			shader->SetUniformMatrix4f("u_Model", glm::identity<glm::mat4>());
-			shader->SetUniformMatrix4f("u_PV", m_Scene->GetProjViewMatrix());
-
-			//vao.Bind();
-			//tex->Bind(0);
-			//glDrawElements(GL_TRIANGLES, ibo.GetCount(), GL_UNSIGNED_SHORT, (const void*)0);
-			mesh->Draw();
-		}
 
 		renderer.Render(m_Scene);
 
