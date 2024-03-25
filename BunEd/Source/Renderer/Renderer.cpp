@@ -1,12 +1,19 @@
 #include "pch.h"
 #include "Renderer.h"
 #include "glad/glad.h"
+#include "Scenes/Scene.h"
+#include "GameObjects/GameObject.h"
 
 Renderer Renderer::s_Instance;
 
 void GLAPIENTRY
 MessageCallback(uint32_t source, uint32_t type, uint32_t id, uint32_t severity, int32_t length, const char* message, const void* userParam)
 {
+	if (type == GL_DEBUG_TYPE_OTHER)
+	{
+		return;
+	}
+
 	fprintf(stderr, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n",
 		(type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : ""),
 		type, severity, message);
@@ -26,6 +33,10 @@ bool Renderer::Init(int width, int height)
 	glDebugMessageCallback(MessageCallback, nullptr);
 #endif
 
+	glEnable(GL_DEPTH_TEST);
+	//glEnable(GL_CULL_FACE);
+	//glCullFace(GL_CCW);
+
 	ChangeViewportSize(width, height);
 
 	return true;
@@ -36,15 +47,16 @@ void Renderer::Shutdown()
 	
 }
 
-void Renderer::Render()
+void Renderer::Render(const std::shared_ptr<Scene>& scene)
 {
-
+	glm::mat4x4 PVMatrix = scene->GetProjViewMatrix();
+	const std::vector<std::shared_ptr<GameObject>>& gameObjects = scene->GetGameObjects();
 }
 
 void Renderer::Clear()
 {
 	glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 void Renderer::SwapBuffers()

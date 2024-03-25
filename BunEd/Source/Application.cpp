@@ -2,10 +2,13 @@
 #include "Application.h"
 #include "imgui.h"
 #include "Renderer/Renderer.h"
+#include "Scenes/Scene.h"
 #include <chrono>
 
 #include "Renderer/ShadersManager.h"
 #include "Renderer/VertexArray.h"
+#include "Mesh/Mesh.h"
+#include "Renderer/Texture2D.h"
 
 Application Application::s_Instance;
 
@@ -31,6 +34,8 @@ bool Application::Init()
 
 	ShadersManager::Get().Init();
 
+	m_Scene = std::make_shared<Scene>();
+
 	return true;
 }
 
@@ -42,23 +47,29 @@ void Application::Run()
 	Window& window = Window::Get();
 
 	float vertices[] = {
-		-0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
-		 0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,
-		 0.0f,  0.5f, 0.0f, 0.0f, 0.0f, 1.0f
+		-0.5f, -0.5f, 0.0f, 0.0f, 1.0f,
+		 0.5f, -0.5f, 0.0f, 1.0f, 1.0f,
+		 0.5f,  0.5f, 0.0f, 1.0f, 0.0f,
+		-0.5f,  0.5f, 0.0f, 0.0f, 0.0f
 	};
 
-	unsigned int indicies[] = {
-		0, 1, 2
+	uint16_t indicies[] = {
+		0, 1, 2,
+		2, 3, 0
 	};
 
-	VertexBuffer vbo(vertices, 6 * 3 * sizeof(float));
-	IndexBuffer ibo(indicies, 3 * sizeof(unsigned int));
+	VertexBuffer vbo(vertices, 5 * 4 * sizeof(float));
+	IndexBuffer ibo(indicies, 6 * sizeof(uint16_t));
 	VertexBufferLayout layout;
 	layout.Push(3, GL_FLOAT, GL_FALSE);
-	layout.Push(3, GL_FLOAT, GL_FALSE);
+	layout.Push(2, GL_FLOAT, GL_FALSE);
+
+	std::shared_ptr<Texture2D> tex = std::make_shared<Texture2D>("Assets/Models/Spider/SpiderTex.jpg");
 
 	VertexArray vao;
 	vao.AddBuffer(vbo, layout, ibo);
+
+	std::shared_ptr<Mesh> mesh = Mesh::CreateMesh("Assets/Models/Spider/spider.obj");
 
 	while (!window.RequestingClose())
 	{
@@ -67,6 +78,8 @@ void Application::Run()
 		window.PollEvents();
 
 		m_ImGuiLayer.PreRender();
+
+		m_Scene->Update(m_DeltaTime);
 
 		renderer.Clear();
 
@@ -79,13 +92,15 @@ void Application::Run()
 			std::shared_ptr<Shader> shader = ShadersManager::Get().GetShader(ShaderType::Default);
 			shader->Bind();
 			shader->SetUniformMatrix4f("u_Model", glm::identity<glm::mat4>());
-			shader->SetUniformMatrix4f("u_PV", glm::identity<glm::mat4>());
-			vao.Bind();
+			shader->SetUniformMatrix4f("u_PV", m_Scene->GetProjViewMatrix());
 
-			glDrawArrays(GL_TRIANGLES, 0, 3);
+			//vao.Bind();
+			//tex->Bind(0);
+			//glDrawElements(GL_TRIANGLES, ibo.GetCount(), GL_UNSIGNED_SHORT, (const void*)0);
+			mesh->Draw();
 		}
 
-		renderer.Render();
+		renderer.Render(m_Scene);
 
 		m_ImGuiLayer.PostRender();
 

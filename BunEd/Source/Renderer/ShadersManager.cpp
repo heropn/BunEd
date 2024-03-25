@@ -5,7 +5,7 @@ ShadersManager ShadersManager::s_Instance;
 
 void ShadersManager::Init()
 {
-	AddShader(ShaderType::Default, "Shaders/defaultVS.glsl", "Shaders/defaultPS.glsl");
+	AddShader(ShaderType::Default, "Assets/Shaders/defaultVS.glsl", "Assets/Shaders/defaultPS.glsl");
 }
 
 void ShadersManager::AddShader(const ShaderType type, const std::string& vertexShaderFilePath, const std::string& fragmentShaderFilePath)

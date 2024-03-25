@@ -20,6 +20,9 @@ bool Window::Init()
 	glfwSetWindowUserPointer(m_GLFWWindow, this);
 
 	glfwGetCursorPos(m_GLFWWindow, reinterpret_cast<double*>(&m_LastMouseX), reinterpret_cast<double*>(&m_LastMouseY));
+	glfwSwapInterval(1);
+
+	BindToCallbacks();
 
 	return true;
 }

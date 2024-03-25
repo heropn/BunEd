@@ -1,5 +1,8 @@
 #pragma once
 #include "ImGui/ImGuiLayer.h"
+#include <memory>
+
+class Scene;
 
 class Application
 {
@@ -22,6 +25,8 @@ private:
 	static Application s_Instance;
 
 	ImGuiLayer m_ImGuiLayer;
+
+	std::shared_ptr<Scene> m_Scene = nullptr;
 
 	float m_DeltaTime = 0.0f;
 };

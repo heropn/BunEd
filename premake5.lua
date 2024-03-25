@@ -29,7 +29,8 @@ project "BunEd"
 		"ThirdParty/_GLAD/include",
 		"ThirdParty/_GLFW/include",
 		"ThirdParty/_glm",
-		"ThirdParty/imgui"
+		"ThirdParty/imgui",
+		"ThirdParty/assimp_build/include"
 	}
 	
 	links
@@ -57,7 +58,27 @@ project "BunEd"
 	filter "configurations:Debug"
 		runtime "Debug"
 		symbols "On"
+		
+		links
+		{
+			"ThirdParty/assimp_build/Debug/assimp-vc142-mtd.lib"
+		}
+		
+		postbuildcommands
+		{
+			"copy \"..\\ThirdParty\\assimp_build\\Debug\\assimp-vc142-mtd.dll\" \"..\\bin\\%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}\\%{prj.name}\" /y"
+		}
 
 	filter "configurations:Release"
 		runtime "Release"
 		optimize "On"
+		
+		links
+		{
+			"ThirdParty/assimp_build/Release/assimp-vc142-mt.lib"
+		}
+		
+		postbuildcommands
+		{
+			"copy \"..\\ThirdParty\\assimp_build\\Release\\assimp-vc142-mt.dll\" \"..\\bin\\%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}\\%{prj.name}\" /y"
+		}

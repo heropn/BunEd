@@ -1,4 +1,7 @@
 #pragma once
+#include <memory>
+
+class Scene;
 
 class Renderer
 {
@@ -10,7 +13,7 @@ public:
 	bool Init(int width, int height);
 	void Shutdown();
 
-	void Render();
+	void Render(const std::shared_ptr<Scene>& scene);
 
 	void Clear();
 	void SwapBuffers();

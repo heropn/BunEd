@@ -84,34 +84,21 @@ void Camera::HandleMouseButtonEvent(int button, int action, int mods)
 	if (button == GLFW_MOUSE_BUTTON_RIGHT)
 	{
 		m_CanRotate = action != GLFW_RELEASE;
-		//ShowCursor(!keyDown);
 	}
 }
 
 void Camera::HandleMouseMoved(float lastX, float lastY, float newX, float newY)
 {
-	// We rotate based on event, instead once per frame
-	// todo: fix
 	if (m_CanRotate)
 	{
-		float xOffset = static_cast<float>(newX - lastX);
-		float yOffset = static_cast<float>(newY - lastY);
-
-		//m_Yaw -= xOffset * m_RotationSpeed * Application::GetApp()->GetDeltaTime();
-		//m_Pitch -= yOffset * m_RotationSpeed * Application::GetApp()->GetDeltaTime();
-
-		m_Pitch = std::clamp(m_Pitch, -89.0f, 89.0f);
-
-		float radianPitch = m_Pitch * (glm::pi<float>() / 180.0f);
-		float radianYaw = m_Yaw * (glm::pi<float>() / 180.0f);
-
-		m_ForwardVector = glm::vec3(cosf(radianYaw) * cosf(radianPitch), sinf(radianPitch), sinf(radianYaw) * cosf(radianPitch));
+		m_YawDelta += newX - lastX;
+		m_PitchDelta += newY - lastY;
 	}
 }
 
 void Camera::HandleResizeCallback(int width, int height)
 {
-	float fovAngle = glm::pi<float>() / 4;
+	float fovAngle = glm::pi<float>() / 4.0f;
 	float nearPlane = 0.1f;
 	float farPlane = 1000.0f;
 
@@ -120,6 +107,22 @@ void Camera::HandleResizeCallback(int width, int height)
 
 void Camera::Update(float deltaTime)
 {
+	if (m_CanRotate && (m_YawDelta != 0.0f || m_PitchDelta != 0.0f))
+	{
+		m_Yaw += m_YawDelta * m_RotationSpeed * deltaTime;
+		m_Pitch -= m_PitchDelta * m_RotationSpeed * deltaTime;
+
+		m_Pitch = std::clamp(m_Pitch, -89.0f, 89.0f);
+
+		float radianPitch = m_Pitch * (glm::pi<float>() / 180.0f);
+		float radianYaw = m_Yaw * (glm::pi<float>() / 180.0f);
+
+		m_ForwardVector = glm::vec3(cosf(radianYaw) * cosf(radianPitch), sinf(radianPitch), sinf(radianYaw) * cosf(radianPitch));
+
+		m_YawDelta = 0.0f;
+		m_PitchDelta = 0.0f;
+	}
+
 	glm::vec3 moveDirection = glm::vec3(0.0f);
 
 	if (m_MoveFlags & CameraMoveFlags::Forward)	moveDirection += GetForwardVector();
@@ -131,4 +134,6 @@ void Camera::Update(float deltaTime)
 	{
 		m_Position += moveDirection * m_MoveSpeed * deltaTime;
 	}
+
+	m_ViewMatrix = glm::lookAtRH(m_Position, m_Position + m_ForwardVector, m_UpVector);
 }

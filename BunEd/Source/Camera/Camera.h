@@ -33,11 +33,11 @@ public:
 	void SetMoveSpeed(float speed) { m_MoveSpeed = speed; }
 	void SetRotationSpeed(float speed) { m_RotationSpeed = speed; }
 
-	inline const glm::mat4x4& GetViewMatrix() const { return m_ViewMatrix; /*return XMMatrixLookAtLH(m_Position, m_Position + m_ForwardVector, m_UpVector);*/ };
+	inline const glm::mat4x4& GetViewMatrix() const { return m_ViewMatrix; };
 	inline const glm::mat4x4& GetProjectionMatrix() const { return m_ProjectionMatrix; };
 
 	inline const glm::vec3& GetForwardVector() const { return m_ForwardVector; }
-	inline const glm::vec3 GetRightVector() const { return glm::normalize(glm::cross(m_UpVector, m_ForwardVector)); }
+	inline const glm::vec3 GetRightVector() const { return glm::normalize(glm::cross(m_ForwardVector, m_UpVector)); }
 
 	inline const glm::vec3 GetPosition() const { return m_Position; }
 
@@ -50,11 +50,14 @@ private:
 	glm::vec3 m_ForwardVector;
 	glm::vec3 m_UpVector;
 
-	float m_MoveSpeed = 100.0f;
-	float m_RotationSpeed = 500.0f;
+	float m_MoveSpeed = 50.0f;
+	float m_RotationSpeed = 25.0f;
 
 	float m_Yaw = 0.0f;
 	float m_Pitch = 0.0f;
+
+	float m_YawDelta = 0.0f;
+	float m_PitchDelta = 0.0f;
 
 	bool m_CanRotate = false;
 
