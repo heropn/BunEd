@@ -4,7 +4,9 @@
 #include "stb/stb_image.h"
 
 Texture2D::Texture2D(const std::string& filePath)
+#ifdef _DEBUG
 	: m_FilePath(filePath)
+#endif
 {
 	stbi_set_flip_vertically_on_load(true);
 	// Currently 4-components, because some textures were invalid

@@ -7,11 +7,15 @@
 #include "Renderer/Texture2D.h"
 
 SubMesh::SubMesh(const std::vector<BaseVertex>& m_Vertices, const std::vector<uint16_t>& m_Indices)
+#ifdef _DEBUG
 	: m_Vertices(m_Vertices), m_Indices(m_Indices)
+#endif
 {
 	m_VertexBuffer = std::make_unique<VertexBuffer>(m_Vertices.data(), m_Vertices.size() * sizeof(BaseVertex));
 	m_IndexBuffer = std::make_unique<IndexBuffer>(m_Indices.data(), m_Indices.size() * sizeof(uint16_t));
 	m_VertexArray = std::make_unique<VertexArray>();
+	m_Layout.Push(3, GL_FLOAT, false);
+	m_Layout.Push(3, GL_FLOAT, false);
 	m_Layout.Push(3, GL_FLOAT, false);
 	m_Layout.Push(2, GL_FLOAT, false);
 
@@ -20,24 +24,6 @@ SubMesh::SubMesh(const std::vector<BaseVertex>& m_Vertices, const std::vector<ui
 
 SubMesh::~SubMesh()
 {
-}
-
-void SubMesh::Draw()
-{
-	/*
-	Mby each submesh should set its texture etc.
-	But some general thing should set matrices for whole mesh
-	And even more general should set some uniforms per shader call such lightning etc.
-	*/
-
-	m_VertexArray->Bind();
-
-	if (m_DiffuseTexture)
-	{
-		m_DiffuseTexture->Bind(0);
-	}
-
-	glDrawElements(GL_TRIANGLES, m_IndexBuffer->GetCount(), GL_UNSIGNED_SHORT, (const void*)0);
 }
 
 std::shared_ptr<Mesh> Mesh::CreateMesh(const std::string& filePath)
@@ -62,16 +48,16 @@ bool Mesh::LoadModel(const std::string& filePath)
 
 	const aiScene* scene = importer.ReadFile(filePath,
 		aiProcess_Triangulate |
-		aiProcess_GenSmoothNormals |
 		aiProcess_RemoveRedundantMaterials |
+		aiProcess_FlipUVs |
 		aiProcess_OptimizeMeshes |
-		aiProcess_OptimizeGraph
+		aiProcess_GenNormals |
+		aiProcess_CalcTangentSpace
 	);
 
 	if (scene == nullptr)
 	{
 		return false;
-		assert(false);
 	}
 
 	m_FileName = filePath;
@@ -79,14 +65,6 @@ bool Mesh::LoadModel(const std::string& filePath)
 	ProcessNode(scene->mRootNode, scene);
 
 	return true;
-}
-
-void Mesh::Draw()
-{
-	for (auto subMesh : m_SubMeshes)
-	{
-		subMesh->Draw();
-	}
 }
 
 void Mesh::ProcessNode(aiNode* node, const aiScene* scene)
@@ -118,17 +96,8 @@ void Mesh::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 		BaseVertex vertex;
 
 		vertex.m_Position = glm::vec3(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
-
-		//vertex.normal.x = mesh->mNormals[i].x;
-		//vertex.normal.y = mesh->mNormals[i].y;
-		//vertex.normal.z = mesh->mNormals[i].z;
-		//
-		//if (mesh->HasTangentsAndBitangents())
-		//{
-		//	vertex.tangent.x = mesh->mTangents[i].x;
-		//	vertex.tangent.y = mesh->mTangents[i].y;
-		//	vertex.tangent.z = mesh->mTangents[i].z;
-		//}
+		vertex.m_Normal = glm::vec3(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);
+		vertex.m_Tangent = glm::vec3(mesh->mTangents[i].x, mesh->mTangents[i].y, mesh->mTangents[i].z);
 
 		if (mesh->HasTextureCoords(0))
 		{
@@ -153,51 +122,21 @@ void Mesh::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 	if (mesh->mMaterialIndex >= 0)
 	{
 		const aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
-		LoadMaterialTexture(material, aiTextureType_DIFFUSE, "texture_diffuse", scene, m_SubMeshes.back()->m_DiffuseTexture);
+		LoadMaterialTexture(material, aiTextureType_DIFFUSE, scene, m_SubMeshes.back()->m_MaterialData.m_DiffuseTexture);
+		LoadMaterialTexture(material, aiTextureType_SPECULAR, scene, m_SubMeshes.back()->m_MaterialData.m_SpecularTexture);
+		LoadMaterialTexture(material, aiTextureType_NORMALS, scene, m_SubMeshes.back()->m_MaterialData.m_NormalsTexture);
 	
-		//aiColor3D colorTemp(0.0f);
-	
-		//if (material->Get(AI_MATKEY_COLOR_AMBIENT, colorTemp) == AI_SUCCESS)
-		//{
-		//	meshMaterial.m_BaseData.m_AmbientColor.x = colorTemp.r;
-		//	meshMaterial.m_BaseData.m_AmbientColor.y = colorTemp.g;
-		//	meshMaterial.m_BaseData.m_AmbientColor.z = colorTemp.b;
-		//	meshMaterial.m_BaseData.m_AmbientColor.w = 1.0f;
-		//}
-		//
-		//if (material->Get(AI_MATKEY_COLOR_DIFFUSE, colorTemp) == AI_SUCCESS)
-		//{
-		//	meshMaterial.m_BaseData.m_DiffuseColor.x = colorTemp.r;
-		//	meshMaterial.m_BaseData.m_DiffuseColor.y = colorTemp.g;
-		//	meshMaterial.m_BaseData.m_DiffuseColor.z = colorTemp.b;
-		//	meshMaterial.m_BaseData.m_DiffuseColor.w = 1.0f;
-		//}
-		//
-		//if (material->Get(AI_MATKEY_COLOR_SPECULAR, colorTemp) == AI_SUCCESS)
-		//{
-		//	meshMaterial.m_BaseData.m_SpecularColor.x = colorTemp.r;
-		//	meshMaterial.m_BaseData.m_SpecularColor.y = colorTemp.g;
-		//	meshMaterial.m_BaseData.m_SpecularColor.z = colorTemp.b;
-		//}
-		//
-		//if (material->Get(AI_MATKEY_COLOR_REFLECTIVE, colorTemp) == AI_SUCCESS)
-		//{
-		//	meshMaterial.m_BaseData.m_ReflectiveColor.x = colorTemp.r;
-		//	meshMaterial.m_BaseData.m_ReflectiveColor.y = colorTemp.g;
-		//	meshMaterial.m_BaseData.m_ReflectiveColor.z = colorTemp.b;
-		//	meshMaterial.m_BaseData.m_ReflectiveColor.w = 1.0f;
-		//}
-		//
-		//float tempExp = 0.0f;
-		//if (material->Get(AI_MATKEY_SHININESS, tempExp))
-		//{
-		//	meshMaterial.m_BaseData.m_SpecularExp = tempExp;
-		//}
+		// todo: fix, somehow even tho 'Ns' value is specified in .obj file is properly parsed to shininess value
+		float shininess = 0.0f;
+		if (material->Get(AI_MATKEY_SHININESS, shininess))
+		{
+			m_SubMeshes.back()->m_MaterialData.m_Shininess = shininess;
+		}
 	}
 
 }
 
-void Mesh::LoadMaterialTexture(const aiMaterial* material, const aiTextureType textureType, const std::string& typeName, const aiScene* scene, std::shared_ptr<Texture2D>& texture)
+void Mesh::LoadMaterialTexture(const aiMaterial* material, const aiTextureType textureType, const aiScene* scene, std::shared_ptr<Texture2D>& texture)
 {
 	for (unsigned int i = 0; i < material->GetTextureCount(textureType); i++)
 	{

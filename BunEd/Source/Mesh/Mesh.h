@@ -14,9 +14,19 @@ struct aiScene;
 
 class Texture2D;
 
+struct MaterialData
+{
+	std::shared_ptr<Texture2D> m_DiffuseTexture = nullptr;
+	std::shared_ptr<Texture2D> m_SpecularTexture = nullptr;
+	std::shared_ptr<Texture2D> m_NormalsTexture = nullptr;
+	float m_Shininess = 0.0f;
+};
+
 struct BaseVertex
 {
 	glm::vec3 m_Position;
+	glm::vec3 m_Normal;
+	glm::vec3 m_Tangent;
 	glm::vec2 m_TexCoord;
 };
 
@@ -25,17 +35,17 @@ struct SubMesh
 	SubMesh(const std::vector<BaseVertex>& m_Vertices, const std::vector<uint16_t>& m_Indices);
 	virtual ~SubMesh();
 
-	void Draw();
-
+#ifdef _DEBUG
 	std::vector<BaseVertex> m_Vertices;
 	std::vector<uint16_t> m_Indices;
+#endif
 
 	std::unique_ptr<VertexBuffer> m_VertexBuffer = nullptr;
 	std::unique_ptr<IndexBuffer> m_IndexBuffer = nullptr;
 	std::unique_ptr<VertexArray> m_VertexArray = nullptr;
-	VertexBufferLayout m_Layout;
 
-	std::shared_ptr<Texture2D> m_DiffuseTexture = nullptr;
+	VertexBufferLayout m_Layout;
+	MaterialData m_MaterialData;
 };
 
 class Mesh
@@ -50,7 +60,7 @@ public:
 	// todo: change and create mesh manager instead of something like this
 	static std::shared_ptr<Mesh> CreateMesh(const std::string& filePath);
 
-	void Draw();
+	const std::vector<std::shared_ptr<SubMesh>>& GetSubMeshes() const { return m_SubMeshes; }
 
 protected:
 
@@ -63,5 +73,5 @@ private:
 	bool LoadModel(const std::string& filePath);
 	void ProcessNode(aiNode* node, const aiScene* scene);
 	void ProcessMesh(aiMesh* mesh, const aiScene* scene);
-	void LoadMaterialTexture(const aiMaterial* material, const aiTextureType textureType, const std::string& typeName, const aiScene* scene, std::shared_ptr<Texture2D>& texture);
+	void LoadMaterialTexture(const aiMaterial* material, const aiTextureType textureType, const aiScene* scene, std::shared_ptr<Texture2D>& texture);
 };

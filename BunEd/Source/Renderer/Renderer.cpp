@@ -5,6 +5,7 @@
 #include "GameObjects/GameObject.h"
 #include "Shader.h"
 #include "Mesh/Mesh.h"
+#include "Texture2D.h"
 
 Renderer Renderer::s_Instance;
 
@@ -36,8 +37,10 @@ bool Renderer::Init(int width, int height)
 #endif
 
 	glEnable(GL_DEPTH_TEST);
+
 	glEnable(GL_CULL_FACE);
-	glCullFace(GL_CCW);
+	glFrontFace(GL_CCW);
+	glCullFace(GL_BACK);
 
 	ChangeViewportSize(width, height);
 
@@ -62,7 +65,31 @@ void Renderer::Render(const std::shared_ptr<Scene>& scene)
 		shader->SetUniformMatrix4f("u_Model", gameObj->GetTransform());
 		shader->SetUniformMatrix4f("u_PV", PVMatrix);
 
-		gameObj->GetMesh()->Draw();
+		const std::vector<std::shared_ptr<SubMesh>>& subMeshes = gameObj->GetMesh()->GetSubMeshes();
+
+		for (const auto& submesh : subMeshes)
+		{
+			if (submesh->m_MaterialData.m_DiffuseTexture)
+			{
+				submesh->m_MaterialData.m_DiffuseTexture->Bind(0);
+			}
+
+			if (submesh->m_MaterialData.m_SpecularTexture)
+			{
+				submesh->m_MaterialData.m_SpecularTexture->Bind(1);
+			}
+
+			if (submesh->m_MaterialData.m_NormalsTexture)
+			{
+				submesh->m_MaterialData.m_NormalsTexture->Bind(2);
+			}
+
+			shader->SetUniform1f("u_Material.m_Shinieness", submesh->m_MaterialData.m_Shininess);
+
+			submesh->m_VertexArray->Bind();
+
+			glDrawElements(GL_TRIANGLES, submesh->m_IndexBuffer->GetCount(), GL_UNSIGNED_SHORT, (const void*)0);
+		}
 	}
 }
 

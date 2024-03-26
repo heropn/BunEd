@@ -17,7 +17,9 @@ private:
 
 	void GenerateTexture(const unsigned char* data);
 
+#ifdef _DEBUG
 	std::string m_FilePath;
+#endif
 
 	int m_Height = 0;
 	int m_Width = 0;

@@ -3,6 +3,7 @@
 #include <memory>
 
 class GameObject;
+class DirectionalLight;
 
 class Scene
 {
@@ -18,5 +19,8 @@ public:
 private:
 
 	std::vector<std::shared_ptr<GameObject>> m_GameObjects;
+
+	std::shared_ptr<DirectionalLight> m_DirLight;
+
 	Camera m_Camera;
 };

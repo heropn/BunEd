@@ -6,6 +6,7 @@
 enum class ShaderType
 {
 	Default,
+	Mesh,
 };
 
 class ShadersManager
