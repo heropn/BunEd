@@ -19,6 +19,8 @@ public:
 	void SetUniform2f(const std::string& uniformName, float f1, float f2) const;
 	void SetUniform1f(const std::string& uniformName, float f1) const;
 
+	void SetUniform1i(const std::string& uniformName, int i1);
+
 	void SetUniformMatrix4f(const std::string& uniformName, const glm::mat4& matrix) const;
 
 private:

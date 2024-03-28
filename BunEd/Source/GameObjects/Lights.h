@@ -48,7 +48,7 @@ class PointLight : public BaseLight
 {
 public:
 
-	PointLight() : m_Position(glm::zero<glm::vec3>()), m_Attenuation(glm::vec3(1.0f, 0.35f, 0.44f)) {}
+	PointLight() : m_Position(glm::zero<glm::vec3>()), m_Attenuation(glm::vec3(1.0f, 0.22f, 0.20f)) {}
 
 	inline void SetPosition(const glm::vec3& pos) { m_Position = pos; }
 	inline const glm::vec3& GetPosition() const { return m_Position; }
@@ -77,10 +77,10 @@ public:
 	inline void SetDirection(const glm::vec3& dir) { m_Direction = glm::normalize(dir); }
 	inline const glm::vec3& GetDirection() const { return m_Direction; }
 
-	inline void SetInnerCutOffAngleDeg(const float deg) { m_InnerCutOffAngleCos = cosf(deg); }
+	inline void SetInnerCutOffAngleDeg(const float deg) { m_InnerCutOffAngleCos = cosf(std::clamp(deg, 0.0f, 90.0f) * glm::pi<float>() / 180.0f); }
 	inline float GetInnerCutOffAngleCos() const { return m_InnerCutOffAngleCos; }
 
-	inline void SetOuterCutOffAngleDeg(const float deg) { m_OuterCutOffAngleCos = cosf(deg); }
+	inline void SetOuterCutOffAngleDeg(const float deg) { m_OuterCutOffAngleCos = cosf(std::clamp(deg, 0.0f, 90.0f) * glm::pi<float>() / 180.0f); }
 	inline float GetOuterCutOffAngleCos() const { return m_OuterCutOffAngleCos; }
 
 private:
@@ -89,8 +89,8 @@ private:
 	//glm::vec3 m_Attenuation;
 	glm::vec3 m_Direction;
 
-	float m_InnerCutOffAngleCos = 25.0f;
-	float m_OuterCutOffAngleCos = 35.0f;
+	float m_InnerCutOffAngleCos = 0.9f;
+	float m_OuterCutOffAngleCos = 0.8f;
 };
 
 /*

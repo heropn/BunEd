@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "Renderer.h"
+#include <format>
 #include "glad/glad.h"
 #include "Scenes/Scene.h"
 #include "GameObjects/GameObject.h"
@@ -76,6 +77,48 @@ void Renderer::Render(const std::shared_ptr<Scene>& scene)
 			shader->SetUniform3f("u_DirLight.m_Specular", lightData.m_DirLight.GetLightsColorConst().m_Specular);
 			shader->SetUniform3f("u_DirLight.m_Direction", lightData.m_DirLight.GetDirection());
 		}
+		else
+		{
+			shader->SetUniform3f("u_DirLight.m_Ambient", glm::zero<glm::vec3>());
+			shader->SetUniform3f("u_DirLight.m_Diffuse", glm::zero<glm::vec3>());
+			shader->SetUniform3f("u_DirLight.m_Specular", glm::zero<glm::vec3>());
+		}
+
+		int pointLightsEnabledCount = 0;
+		for (int i = 0; i < SceneLightData::MAX_LIGHTS; i++)
+		{
+			const PointLight& pointLight = lightData.m_PointLights[i];
+			if (pointLight.isEnabled())
+			{
+				shader->SetUniform3f(std::format("u_PointLights[{}].m_Ambient", pointLightsEnabledCount), pointLight.GetLightsColorConst().m_Ambient);
+				shader->SetUniform3f(std::format("u_PointLights[{}].m_Diffuse", pointLightsEnabledCount), pointLight.GetLightsColorConst().m_Diffuse);
+				shader->SetUniform3f(std::format("u_PointLights[{}].m_Specular", pointLightsEnabledCount), pointLight.GetLightsColorConst().m_Specular);
+				shader->SetUniform3f(std::format("u_PointLights[{}].m_Position", pointLightsEnabledCount), pointLight.GetPosition());
+				shader->SetUniform3f(std::format("u_PointLights[{}].m_Attenuation", pointLightsEnabledCount), pointLight.GetAttenuation());
+				pointLightsEnabledCount++;
+			}
+		}
+
+		shader->SetUniform1i("u_PointLightsEnabledCount", pointLightsEnabledCount);
+
+		int spotLightsEnabledCount = 0;
+		for (int i = 0; i < SceneLightData::MAX_LIGHTS; i++)
+		{
+			const SpotLight& spotLight = lightData.m_SpotLights[i];
+			if (spotLight.isEnabled())
+			{
+				shader->SetUniform3f(std::format("u_SpotLights[{}].m_Ambient", spotLightsEnabledCount), spotLight.GetLightsColorConst().m_Ambient);
+				shader->SetUniform3f(std::format("u_SpotLights[{}].m_Diffuse", spotLightsEnabledCount), spotLight.GetLightsColorConst().m_Diffuse);
+				shader->SetUniform3f(std::format("u_SpotLights[{}].m_Specular", spotLightsEnabledCount), spotLight.GetLightsColorConst().m_Specular);
+				shader->SetUniform3f(std::format("u_SpotLights[{}].m_Position", spotLightsEnabledCount), spotLight.GetPosition());
+				shader->SetUniform3f(std::format("u_SpotLights[{}].m_Direction", spotLightsEnabledCount), spotLight.GetDirection());
+				shader->SetUniform1f(std::format("u_SpotLights[{}].m_InnerCutOffAngleCos", spotLightsEnabledCount), spotLight.GetInnerCutOffAngleCos());
+				shader->SetUniform1f(std::format("u_SpotLights[{}].m_OuterCutOffAngleCos", spotLightsEnabledCount), spotLight.GetOuterCutOffAngleCos());
+				spotLightsEnabledCount++;
+			}
+		}
+
+		shader->SetUniform1i("u_SpotLightsEnabledCount", spotLightsEnabledCount);
 
 		const std::vector<std::shared_ptr<SubMesh>>& subMeshes = gameObj->GetMesh()->GetSubMeshes();
 
