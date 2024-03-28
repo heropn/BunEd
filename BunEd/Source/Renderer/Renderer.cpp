@@ -3,6 +3,7 @@
 #include "glad/glad.h"
 #include "Scenes/Scene.h"
 #include "GameObjects/GameObject.h"
+#include "GameObjects/Lights.h"
 #include "Shader.h"
 #include "Mesh/Mesh.h"
 #include "Texture2D.h"
@@ -54,7 +55,9 @@ void Renderer::Shutdown()
 
 void Renderer::Render(const std::shared_ptr<Scene>& scene)
 {
-	glm::mat4x4 PVMatrix = scene->GetProjViewMatrix();
+	const glm::mat4x4& PVMatrix = scene->GetProjViewMatrix();
+	const glm::vec3& cameraPos = scene->GetCameraPos();
+	const SceneLightData& lightData = scene->GetSceneLightData();
 	const std::vector<std::shared_ptr<GameObject>>& gameObjects = scene->GetGameObjects();
 
 	for (const auto& gameObj : gameObjects)
@@ -64,6 +67,15 @@ void Renderer::Render(const std::shared_ptr<Scene>& scene)
 		shader->Bind();
 		shader->SetUniformMatrix4f("u_Model", gameObj->GetTransform());
 		shader->SetUniformMatrix4f("u_PV", PVMatrix);
+		shader->SetUniform3f("u_EyePos", cameraPos);
+
+		if (lightData.m_DirLight.isEnabled())
+		{
+			shader->SetUniform3f("u_DirLight.m_Ambient", lightData.m_DirLight.GetLightsColorConst().m_Ambient);
+			shader->SetUniform3f("u_DirLight.m_Diffuse", lightData.m_DirLight.GetLightsColorConst().m_Diffuse);
+			shader->SetUniform3f("u_DirLight.m_Specular", lightData.m_DirLight.GetLightsColorConst().m_Specular);
+			shader->SetUniform3f("u_DirLight.m_Direction", lightData.m_DirLight.GetDirection());
+		}
 
 		const std::vector<std::shared_ptr<SubMesh>>& subMeshes = gameObj->GetMesh()->GetSubMeshes();
 
@@ -84,6 +96,7 @@ void Renderer::Render(const std::shared_ptr<Scene>& scene)
 				submesh->m_MaterialData.m_NormalsTexture->Bind(2);
 			}
 
+			shader->SetUniform4f("u_Material.m_Color", submesh->m_MaterialData.m_Color);
 			shader->SetUniform1f("u_Material.m_Shinieness", submesh->m_MaterialData.m_Shininess);
 
 			submesh->m_VertexArray->Bind();

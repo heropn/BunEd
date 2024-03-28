@@ -32,7 +32,7 @@ vec3 ComputeDirectionalLight(Material mat, DirectionalLight dirLight, vec3 norma
 
 	if (diffuseFactor > 0.0f)
 	{
-		color += dirLight.m_Diffuse;
+		color += dirLight.m_Diffuse * diffuseFactor;
 	}
 
 	return color;
@@ -45,6 +45,7 @@ void main()
 	dirLight.m_Diffuse = vec3(0.6f);
 	dirLight.m_Specular = vec3(1.0f);
 	dirLight.m_Direction = vec3(0.0f, -1.0f, 0.0f);
+	//dirLight.m_Direction = normalize(transpose(v_TBN) * dirLight.m_Direction);
 
 	vec3 lightColor = vec3(0.0f);
 
@@ -55,4 +56,5 @@ void main()
 	lightColor += ComputeDirectionalLight(u_Material, dirLight, normal, vec3(0.0f));
 
 	o_FragmentColor = texture(u_Material.m_DiffuseTexture, v_TexCoord) * vec4(lightColor, 1.0f);
+	o_FragmentColor = vec4(normal, 1.0f);
 }

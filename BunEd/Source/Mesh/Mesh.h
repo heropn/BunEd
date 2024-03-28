@@ -19,15 +19,16 @@ struct MaterialData
 	std::shared_ptr<Texture2D> m_DiffuseTexture = nullptr;
 	std::shared_ptr<Texture2D> m_SpecularTexture = nullptr;
 	std::shared_ptr<Texture2D> m_NormalsTexture = nullptr;
-	float m_Shininess = 0.0f;
+	glm::vec4 m_Color = glm::vec4(1.0f);
+	float m_Shininess = 1.0f;
 };
 
 struct BaseVertex
 {
 	glm::vec3 m_Position;
 	glm::vec3 m_Normal;
-	glm::vec3 m_Tangent;
-	glm::vec2 m_TexCoord;
+	//glm::vec3 m_Tangent;
+	//glm::vec2 m_TexCoord;
 };
 
 struct SubMesh

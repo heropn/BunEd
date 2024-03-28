@@ -28,7 +28,7 @@ void Shader::SetUniform4f(const std::string& uniformName, float f1, float f2, fl
 	glUniform4f(GetUniformLocation(uniformName), f1, f2, f3, f4);
 }
 
-void Shader::SetUniform4f(const std::string& uniformName, glm::vec4 vec4) const
+void Shader::SetUniform4f(const std::string& uniformName, const glm::vec4& vec4) const
 {
 	glUniform4f(GetUniformLocation(uniformName), vec4.x, vec4.y, vec4.z, vec4.w);
 }
@@ -38,7 +38,7 @@ void Shader::SetUniform3f(const std::string& uniformName, float f1, float f2, fl
 	glUniform3f(GetUniformLocation(uniformName), f1, f2, f3);
 }
 
-void Shader::SetUniform3f(const std::string& uniformName, glm::vec3 vec3) const
+void Shader::SetUniform3f(const std::string& uniformName, const glm::vec3& vec3) const
 {
 	glUniform3f(GetUniformLocation(uniformName), vec3.x, vec3.y, vec3.z);
 }
@@ -53,7 +53,7 @@ void Shader::SetUniform1f(const std::string& uniformName, float f1) const
 	glUniform1f(GetUniformLocation(uniformName), f1);
 }
 
-void Shader::SetUniformMatrix4f(const std::string& uniformName, glm::mat4 matrix) const
+void Shader::SetUniformMatrix4f(const std::string& uniformName, const glm::mat4& matrix) const
 {
 	glUniformMatrix4fv(GetUniformLocation(uniformName), 1, GL_FALSE, glm::value_ptr(matrix));
 }

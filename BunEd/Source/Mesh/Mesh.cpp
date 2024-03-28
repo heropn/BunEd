@@ -16,8 +16,6 @@ SubMesh::SubMesh(const std::vector<BaseVertex>& m_Vertices, const std::vector<ui
 	m_VertexArray = std::make_unique<VertexArray>();
 	m_Layout.Push(3, GL_FLOAT, false);
 	m_Layout.Push(3, GL_FLOAT, false);
-	m_Layout.Push(3, GL_FLOAT, false);
-	m_Layout.Push(2, GL_FLOAT, false);
 
 	m_VertexArray->AddBuffer(*m_VertexBuffer, m_Layout, *m_IndexBuffer);
 }
@@ -49,10 +47,9 @@ bool Mesh::LoadModel(const std::string& filePath)
 	const aiScene* scene = importer.ReadFile(filePath,
 		aiProcess_Triangulate |
 		aiProcess_RemoveRedundantMaterials |
-		aiProcess_FlipUVs |
 		aiProcess_OptimizeMeshes |
-		aiProcess_GenNormals |
-		aiProcess_CalcTangentSpace
+		aiProcess_GenNormals// |
+		//aiProcess_CalcTangentSpace
 	);
 
 	if (scene == nullptr)
@@ -97,12 +94,12 @@ void Mesh::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 
 		vertex.m_Position = glm::vec3(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
 		vertex.m_Normal = glm::vec3(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);
-		vertex.m_Tangent = glm::vec3(mesh->mTangents[i].x, mesh->mTangents[i].y, mesh->mTangents[i].z);
+		//vertex.m_Tangent = glm::vec3(mesh->mTangents[i].x, mesh->mTangents[i].y, mesh->mTangents[i].z);
 
-		if (mesh->HasTextureCoords(0))
-		{
-			vertex.m_TexCoord = glm::vec2(mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y);
-		}
+		//if (mesh->HasTextureCoords(0))
+		//{
+		//	vertex.m_TexCoord = glm::vec2(mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y);
+		//}
 
 		vertices.push_back(vertex);
 	}
@@ -131,6 +128,12 @@ void Mesh::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 		if (material->Get(AI_MATKEY_SHININESS, shininess))
 		{
 			m_SubMeshes.back()->m_MaterialData.m_Shininess = shininess;
+		}
+
+		aiColor4D color;
+		if (material->Get(AI_MATKEY_COLOR_DIFFUSE, color))
+		{
+			m_SubMeshes.back()->m_MaterialData.m_Color = glm::vec4(color.r, color.g, color.b, color.a);
 		}
 	}
 

@@ -50,7 +50,7 @@ private:
 	glm::vec3 m_ForwardVector;
 	glm::vec3 m_UpVector;
 
-	float m_MoveSpeed = 25.0f;
+	float m_MoveSpeed = 10.0f;
 	float m_RotationSpeed = 25.0f;
 
 	float m_Yaw = 0.0f;
