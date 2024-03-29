@@ -41,6 +41,9 @@ public:
 
 	inline const glm::vec3 GetPosition() const { return m_Position; }
 
+	inline float GetNearPlane() const { return m_NearPlane; }
+	inline float GetFarPlane() const { return m_FarPlane; }
+
 private:
 
 	glm::mat4x4 m_ViewMatrix;
@@ -49,6 +52,10 @@ private:
 	glm::vec3 m_Position;
 	glm::vec3 m_ForwardVector;
 	glm::vec3 m_UpVector;
+
+	float m_NearPlane = 0.1f;
+	float m_FarPlane = 20.0f;
+	float m_FovAngle = glm::pi<float>() / 4.0f;
 
 	float m_MoveSpeed = 10.0f;
 	float m_RotationSpeed = 25.0f;

@@ -4,6 +4,11 @@
 #include "GameObjects/Lights.h"
 #include "Mesh/Mesh.h"
 
+/*
+todo next:
+- Visualize position of lights
+*/
+
 Scene::Scene()
 {
 	m_Camera.Init(glm::vec3(0.0f, 0.0f, 10.0f));
@@ -15,7 +20,7 @@ Scene::Scene()
 	m_GameObjects.push_back(gameObj);
 
 	m_LightData.m_DirLight.SetIsEnabled(true);
-	m_LightData.m_DirLight.SetTransform(glm::translate(glm::identity<glm::mat4x4>(), glm::vec3(0.0f, 20.0f, 0.0f)));
+	m_LightData.m_DirLight.SetDebugTransform(glm::translate(glm::identity<glm::mat4x4>(), glm::vec3(0.0f, 10.0f, 0.0f)));
 	m_LightData.m_DirLight.SetDirection(glm::vec3(0.0f, -1.0f, 0.0f));
 	m_LightData.m_DirLight.GetLightsColor().m_Ambient = glm::vec3(0.1f);
 	m_LightData.m_DirLight.GetLightsColor().m_Diffuse = glm::vec3(0.6f);

@@ -7,7 +7,8 @@ enum class ShaderType
 {
 	Default,
 	MeshTex,
-	MeshColor
+	MeshColor,
+	DepthVisualizer
 };
 
 class ShadersManager

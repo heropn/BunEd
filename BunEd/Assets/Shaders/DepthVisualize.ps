@@ -1,0 +1,15 @@
+#version 460 core
+
+out vec4 o_FragmentColor;
+
+uniform float u_NearPlane;
+uniform float u_FarPlane;
+
+void main()
+{
+	float z = gl_FragCoord.z * 2.0f - 1.0f;
+	float depth = (2.0f * u_NearPlane * u_FarPlane) / (u_FarPlane + u_NearPlane - z * (u_FarPlane - u_NearPlane));
+	depth /= u_FarPlane;
+
+	o_FragmentColor = vec4(vec3(depth), 1.0f);
+}

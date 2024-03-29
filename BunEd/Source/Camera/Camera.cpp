@@ -23,13 +23,10 @@ void Camera::Init(glm::vec3 cameraPos, glm::vec3 cameraTarget)
 	m_Pitch = asinf(m_ForwardVector.x);
 	m_Yaw = asinf(m_ForwardVector.z / cosf(m_Pitch)) / (glm::pi<float>() / 180.0f);
 
-	float fovAngle = glm::pi<float>() / 4;
 	float width = static_cast<float>(Window::Get().GetWidth());
 	float height = static_cast<float>(Window::Get().GetHeight());
-	float nearPlane = 0.1f;
-	float farPlane = 1000.0f;
 
-	m_ProjectionMatrix = glm::perspectiveFovRH(fovAngle, width, height, nearPlane, farPlane);
+	m_ProjectionMatrix = glm::perspectiveFovRH(m_FovAngle, width, height, m_NearPlane, m_FarPlane);
 
 	Window::Get().m_KeyStateChangedDispatcher.Bind(CALLBACK_3(&Camera::HandleKeyEvent, this));
 	Window::Get().m_CursorMovedDispatcher.Bind(CALLBACK_4(&Camera::HandleMouseMoved, this));
@@ -98,11 +95,7 @@ void Camera::HandleMouseMoved(float lastX, float lastY, float newX, float newY)
 
 void Camera::HandleResizeCallback(int width, int height)
 {
-	float fovAngle = glm::pi<float>() / 4.0f;
-	float nearPlane = 0.1f;
-	float farPlane = 1000.0f;
-
-	m_ProjectionMatrix = glm::perspectiveFovRH(fovAngle, static_cast<float>(width), static_cast<float>(height), nearPlane, farPlane);
+	m_ProjectionMatrix = glm::perspectiveFovRH(m_FovAngle, static_cast<float>(width), static_cast<float>(height), m_NearPlane, m_FarPlane);
 }
 
 void Camera::Update(float deltaTime)

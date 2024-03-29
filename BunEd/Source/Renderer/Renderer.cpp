@@ -2,12 +2,13 @@
 #include "Renderer.h"
 #include <format>
 #include "glad/glad.h"
-#include "Scenes/Scene.h"
+#include "Camera/Camera.h"
 #include "GameObjects/GameObject.h"
 #include "GameObjects/Lights.h"
-#include "Shader.h"
 #include "Mesh/Mesh.h"
 #include "Texture2D.h"
+#include "Scenes/Scene.h"
+#include "Shader.h"
 
 Renderer Renderer::s_Instance;
 
@@ -39,6 +40,7 @@ bool Renderer::Init(int width, int height)
 #endif
 
 	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
 
 	glEnable(GL_CULL_FACE);
 	glFrontFace(GL_CCW);
@@ -56,6 +58,12 @@ void Renderer::Shutdown()
 
 void Renderer::Render(const std::shared_ptr<Scene>& scene)
 {
+	if (m_VisualizeDepth)
+	{
+		RenderDepth(scene);
+		return;
+	}
+
 	const glm::mat4x4& PVMatrix = scene->GetProjViewMatrix();
 	const glm::vec3& cameraPos = scene->GetCameraPos();
 	const SceneLightData& lightData = scene->GetSceneLightData();
@@ -163,4 +171,28 @@ void Renderer::SwapBuffers()
 void Renderer::ChangeViewportSize(int width, int height)
 {
 	glViewport(0, 0, width, height);
+}
+
+void Renderer::RenderDepth(const std::shared_ptr<Scene>& scene)
+{
+	const glm::mat4x4& PVMatrix = scene->GetProjViewMatrix();
+	const std::vector<std::shared_ptr<GameObject>>& gameObjects = scene->GetGameObjects();
+	std::shared_ptr<Shader> shader = ShadersManager::Get().GetShader(ShaderType::DepthVisualizer);
+
+	for (const auto& gameObj : gameObjects)
+	{
+		shader->Bind();
+		shader->SetUniformMatrix4f("u_Model", gameObj->GetTransform());
+		shader->SetUniformMatrix4f("u_PV", PVMatrix);
+		shader->SetUniform1f("u_NearPlane", scene->GetCamera().GetNearPlane());
+		shader->SetUniform1f("u_FarPlane", scene->GetCamera().GetFarPlane());
+
+		const std::vector<std::shared_ptr<SubMesh>>& subMeshes = gameObj->GetMesh()->GetSubMeshes();
+
+		for (const auto& submesh : subMeshes)
+		{
+			submesh->m_VertexArray->Bind();
+			glDrawElements(GL_TRIANGLES, submesh->m_IndexBuffer->GetCount(), GL_UNSIGNED_SHORT, (const void*)0);
+		}
+	}
 }

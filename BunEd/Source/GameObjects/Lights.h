@@ -12,21 +12,21 @@ class BaseLight
 {
 public:
 
-	BaseLight() : m_Transform(glm::identity<glm::mat4x4>()) {}
+	BaseLight() : m_DebugTransform(glm::identity<glm::mat4x4>()) {}
 
 	const LightColors& GetLightsColorConst() const { return m_Color; }
 	LightColors& GetLightsColor() { return m_Color; }
 
-	void SetTransform(const glm::mat4x4& transform) { m_Transform = transform; }
-	const glm::mat4x4& GetTransform() const { return m_Transform; }
+	void SetDebugTransform(const glm::mat4x4& transform) { m_DebugTransform = transform; }
+	const glm::mat4x4& GetDebugTransform() const { return m_DebugTransform; }
 
 	inline void SetIsEnabled(const bool isEnabled) { m_isEnabled = isEnabled; }
 	inline bool isEnabled() const { return m_isEnabled; }
 
 protected:
 
+	glm::mat4x4 m_DebugTransform;
 	LightColors m_Color;
-	glm::mat4x4 m_Transform;
 	bool m_isEnabled = false;
 };
 
@@ -66,13 +66,10 @@ class SpotLight : public BaseLight
 {
 public:
 
-	SpotLight() : m_Position(glm::zero<glm::vec3>()), /*m_Attenuation(glm::vec3(1.0f, 0.35f, 0.44f)),*/ m_Direction(glm::vec3(0.0f, 0.0f, -1.0f)) {}
+	SpotLight() : m_Position(glm::zero<glm::vec3>()), m_Direction(glm::vec3(0.0f, 0.0f, -1.0f)) {}
 
 	inline void SetPosition(const glm::vec3& pos) { m_Position = pos; }
 	inline const glm::vec3& GetPosition() const { return m_Position; }
-
-	//inline void SetAttenuation(const glm::vec3& attenuation) { m_Attenuation = attenuation; }
-	//inline const glm::vec3& GetAttenuation() const { return m_Attenuation; }
 
 	inline void SetDirection(const glm::vec3& dir) { m_Direction = glm::normalize(dir); }
 	inline const glm::vec3& GetDirection() const { return m_Direction; }
@@ -86,7 +83,6 @@ public:
 private:
 
 	glm::vec3 m_Position;
-	//glm::vec3 m_Attenuation;
 	glm::vec3 m_Direction;
 
 	float m_InnerCutOffAngleCos = 0.9f;

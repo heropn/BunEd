@@ -5,9 +5,10 @@ ShadersManager ShadersManager::s_Instance;
 
 void ShadersManager::Init()
 {
-	AddShader(ShaderType::Default, "Assets/Shaders/defaultVS.glsl", "Assets/Shaders/defaultPS.glsl");
-	AddShader(ShaderType::MeshTex, "Assets/Shaders/MeshTexVS.glsl", "Assets/Shaders/MeshTexPS.glsl");
-	AddShader(ShaderType::MeshColor, "Assets/Shaders/MeshColorVS.glsl", "Assets/Shaders/MeshColorPS.glsl");
+	AddShader(ShaderType::Default, "Assets/Shaders/default.vs", "Assets/Shaders/default.ps");
+	AddShader(ShaderType::MeshTex, "Assets/Shaders/MeshTex.vs", "Assets/Shaders/MeshTex.ps");
+	AddShader(ShaderType::MeshColor, "Assets/Shaders/MeshColor.vs", "Assets/Shaders/MeshColor.ps");
+	AddShader(ShaderType::DepthVisualizer, "Assets/Shaders/DepthVisualize.vs", "Assets/Shaders/DepthVisualize.ps");
 }
 
 void ShadersManager::AddShader(const ShaderType type, const std::string& vertexShaderFilePath, const std::string& fragmentShaderFilePath)
