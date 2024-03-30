@@ -6,13 +6,13 @@
 #include "Renderer/TexturesManager.h"
 #include "Renderer/Texture2D.h"
 
-SubMesh::SubMesh(const std::vector<BaseVertex>& m_Vertices, const std::vector<uint16_t>& m_Indices)
+SubMesh::SubMesh(const std::vector<BaseVertex>& m_Vertices, const std::vector<uint32_t>& m_Indices)
 #ifdef _DEBUG
 	: m_Vertices(m_Vertices), m_Indices(m_Indices)
 #endif
 {
 	m_VertexBuffer = std::make_unique<VertexBuffer>(m_Vertices.data(), m_Vertices.size() * sizeof(BaseVertex));
-	m_IndexBuffer = std::make_unique<IndexBuffer>(m_Indices.data(), m_Indices.size() * sizeof(uint16_t));
+	m_IndexBuffer = std::make_unique<IndexBuffer>(m_Indices.data(), m_Indices.size() * sizeof(uint32_t));
 	m_VertexArray = std::make_unique<VertexArray>();
 	m_Layout.Push(3, GL_FLOAT, false);
 	m_Layout.Push(3, GL_FLOAT, false);
@@ -46,6 +46,7 @@ bool Mesh::LoadModel(const std::string& filePath)
 
 	const aiScene* scene = importer.ReadFile(filePath,
 		aiProcess_Triangulate |
+		aiProcess_JoinIdenticalVertices |
 		aiProcess_RemoveRedundantMaterials |
 		aiProcess_OptimizeMeshes |
 		aiProcess_GenNormals// |
@@ -85,8 +86,8 @@ void Mesh::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 	// Data to fill
 	std::vector<BaseVertex> vertices;
 	vertices.reserve(mesh->mNumVertices);
-	std::vector<uint16_t> indices;
-	indices.reserve(mesh->mNumVertices / 3);
+	std::vector<uint32_t> indices;
+	indices.reserve(mesh->mNumFaces * 3);
 
 	for (unsigned int i = 0; i < mesh->mNumVertices; i++)
 	{

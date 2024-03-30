@@ -1,8 +1,8 @@
 #include "pch.h"
 #include "IndexBuffer.h"
 
-IndexBuffer::IndexBuffer(const void* const indices, uint16_t size)
-	: m_Count(size / sizeof(uint16_t))
+IndexBuffer::IndexBuffer(const void* const indices, uint32_t size)
+	: m_Count(size / sizeof(uint32_t))
 {
 	glGenBuffers(1, &m_ID);
 	Bind();

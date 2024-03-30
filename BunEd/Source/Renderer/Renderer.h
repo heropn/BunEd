@@ -25,9 +25,10 @@ private:
 
 	Renderer() = default;
 
+	void RenderScene(const std::shared_ptr<Scene>& scene);
 	void RenderDepth(const std::shared_ptr<Scene>& scene);
 
 	static Renderer s_Instance;
 
-	bool m_VisualizeDepth = true;
+	bool m_VisualizeDepth = false;
 };

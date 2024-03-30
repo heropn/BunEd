@@ -54,7 +54,7 @@ private:
 	glm::vec3 m_UpVector;
 
 	float m_NearPlane = 0.1f;
-	float m_FarPlane = 20.0f;
+	float m_FarPlane = 50.0f;
 	float m_FovAngle = glm::pi<float>() / 4.0f;
 
 	float m_MoveSpeed = 10.0f;

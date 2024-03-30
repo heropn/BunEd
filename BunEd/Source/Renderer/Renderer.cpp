@@ -46,6 +46,8 @@ bool Renderer::Init(int width, int height)
 	glFrontFace(GL_CCW);
 	glCullFace(GL_BACK);
 
+	//glEnable(GL_STENCIL_TEST);
+
 	ChangeViewportSize(width, height);
 
 	return true;
@@ -64,6 +66,27 @@ void Renderer::Render(const std::shared_ptr<Scene>& scene)
 		return;
 	}
 
+	RenderScene(scene);
+}
+
+void Renderer::Clear()
+{
+	glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+void Renderer::SwapBuffers()
+{
+	glfwSwapBuffers(Window::Get().GetGLFWWindow());
+}
+
+void Renderer::ChangeViewportSize(int width, int height)
+{
+	glViewport(0, 0, width, height);
+}
+
+void Renderer::RenderScene(const std::shared_ptr<Scene>& scene)
+{
 	const glm::mat4x4& PVMatrix = scene->GetProjViewMatrix();
 	const glm::vec3& cameraPos = scene->GetCameraPos();
 	const SceneLightData& lightData = scene->GetSceneLightData();
@@ -152,25 +175,9 @@ void Renderer::Render(const std::shared_ptr<Scene>& scene)
 
 			submesh->m_VertexArray->Bind();
 
-			glDrawElements(GL_TRIANGLES, submesh->m_IndexBuffer->GetCount(), GL_UNSIGNED_SHORT, (const void*)0);
+			glDrawElements(GL_TRIANGLES, submesh->m_IndexBuffer->GetCount(), GL_UNSIGNED_INT, (const void*)0);
 		}
 	}
-}
-
-void Renderer::Clear()
-{
-	glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-}
-
-void Renderer::SwapBuffers()
-{
-	glfwSwapBuffers(Window::Get().GetGLFWWindow());
-}
-
-void Renderer::ChangeViewportSize(int width, int height)
-{
-	glViewport(0, 0, width, height);
 }
 
 void Renderer::RenderDepth(const std::shared_ptr<Scene>& scene)
@@ -192,7 +199,7 @@ void Renderer::RenderDepth(const std::shared_ptr<Scene>& scene)
 		for (const auto& submesh : subMeshes)
 		{
 			submesh->m_VertexArray->Bind();
-			glDrawElements(GL_TRIANGLES, submesh->m_IndexBuffer->GetCount(), GL_UNSIGNED_SHORT, (const void*)0);
+			glDrawElements(GL_TRIANGLES, submesh->m_IndexBuffer->GetCount(), GL_UNSIGNED_INT, (const void*)0);
 		}
 	}
 }

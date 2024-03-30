@@ -33,12 +33,12 @@ struct BaseVertex
 
 struct SubMesh
 {
-	SubMesh(const std::vector<BaseVertex>& m_Vertices, const std::vector<uint16_t>& m_Indices);
+	SubMesh(const std::vector<BaseVertex>& m_Vertices, const std::vector<uint32_t>& m_Indices);
 	virtual ~SubMesh();
 
 #ifdef _DEBUG
 	std::vector<BaseVertex> m_Vertices;
-	std::vector<uint16_t> m_Indices;
+	std::vector<uint32_t> m_Indices;
 #endif
 
 	std::unique_ptr<VertexBuffer> m_VertexBuffer = nullptr;
