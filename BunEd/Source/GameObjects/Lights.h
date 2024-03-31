@@ -14,19 +14,17 @@ public:
 
 	BaseLight() : m_DebugTransform(glm::identity<glm::mat4x4>()) {}
 
-	const LightColors& GetLightsColorConst() const { return m_Color; }
-	LightColors& GetLightsColor() { return m_Color; }
-
 	void SetDebugTransform(const glm::mat4x4& transform) { m_DebugTransform = transform; }
 	const glm::mat4x4& GetDebugTransform() const { return m_DebugTransform; }
 
 	inline void SetIsEnabled(const bool isEnabled) { m_isEnabled = isEnabled; }
 	inline bool isEnabled() const { return m_isEnabled; }
 
+	LightColors m_Color;
+
 protected:
 
 	glm::mat4x4 m_DebugTransform;
-	LightColors m_Color;
 	bool m_isEnabled = false;
 };
 

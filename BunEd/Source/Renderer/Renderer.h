@@ -1,6 +1,7 @@
 #pragma once
 #include <memory>
 
+class GameObject;
 class Scene;
 
 class Renderer
@@ -27,6 +28,8 @@ private:
 
 	void RenderScene(const std::shared_ptr<Scene>& scene);
 	void RenderDepth(const std::shared_ptr<Scene>& scene);
+
+	void RenderGameObject(const std::shared_ptr<GameObject>& gameObj, const std::shared_ptr<Scene>& scene);
 
 	static Renderer s_Instance;
 

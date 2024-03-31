@@ -3,17 +3,9 @@
 
 class Shader;
 
-class Material
+struct Material
 {
-public:
-
-	Material() = default;
-
-	void SetShader(const std::shared_ptr<Shader>& shader) { m_Shader = shader; }
-
-	void BindShader();
-
-private:
-
 	std::shared_ptr<Shader> m_Shader = nullptr;
+	
+	bool m_IsTranslucent = false;
 };

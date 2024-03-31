@@ -145,4 +145,5 @@ void main()
 	}
 
 	o_FragmentColor = u_Material.m_Color * vec4(lightColor, 1.0f);
+	o_FragmentColor.a = 0.3f;
 }
