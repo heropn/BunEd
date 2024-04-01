@@ -76,7 +76,16 @@ void Texture2D::GenerateTexture(const unsigned char* data)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	
+	if (m_Format == GL_DEPTH24_STENCIL8)
+	{
+		glTexStorage2D(GL_TEXTURE_2D, 1, m_Format, m_Width, m_Height);
+	}
+	else
+	{
+		glTexImage2D(GL_TEXTURE_2D, 0, m_Format, m_Width, m_Height, 0, m_Format, GL_UNSIGNED_BYTE, data);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, m_Format, m_Width, m_Height, 0, m_Format, GL_UNSIGNED_BYTE, data);
+	}
+
 	//glGenerateMipmap(GL_TEXTURE_2D);
 }

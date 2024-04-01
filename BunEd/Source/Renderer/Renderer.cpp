@@ -107,19 +107,21 @@ void Renderer::Render(const std::shared_ptr<Scene>& scene)
 
 	m_OffScreenFrameBuffer->Unbind();
 
-	ShadersManager::Get().GetShader(ShaderType::ScreenRender)->Bind();
+	ShadersManager::Get().GetShader(ShaderType::StencilOutlinePP)->Bind();
 	m_ScreenVertexArray->Bind();
 	m_OffScreenFrameBuffer->GetColorBufferTexture()->Bind(0);
+	glBindTextureUnit(1, m_OffScreenFrameBuffer->m_StencilView);
 
 	glDrawElements(GL_TRIANGLES, m_ScreenIndexBuffer->GetCount(), GL_UNSIGNED_INT, (const void*)0);
 
 	m_OffScreenFrameBuffer->GetColorBufferTexture()->Unbind();
+	glBindTextureUnit(1, 0);
 }
 
 void Renderer::Clear()
 {
 	glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 }
 
 void Renderer::SwapBuffers()
@@ -136,6 +138,11 @@ void Renderer::ChangeViewportSize(int width, int height)
 
 void Renderer::RenderScene(const std::shared_ptr<Scene>& scene)
 {
+	glEnable(GL_STENCIL_TEST);
+	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+	glStencilFunc(GL_ALWAYS, 1, 0xff);
+	glStencilMask(0xff);
+
 	const glm::mat4x4& PVMatrix = scene->GetProjViewMatrix();
 	const glm::vec3& cameraPos = scene->GetCameraPos();
 	const SceneLightData& lightData = scene->GetSceneLightData();
@@ -169,6 +176,8 @@ void Renderer::RenderScene(const std::shared_ptr<Scene>& scene)
 	{
 		RenderGameObject(translucentGameObj, scene);
 	}
+
+	glDisable(GL_STENCIL_TEST);
 }
 
 void Renderer::RenderDepth(const std::shared_ptr<Scene>& scene)

@@ -14,8 +14,11 @@ std::shared_ptr<FrameBuffer> FrameBuffer::CreateColorDepthStencilFrameBuffer(int
 	frameBuffer->m_ColorBuffer = TexturesManager::Get().CreateTexture2D(width, height, GL_RGB);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, frameBuffer->m_ColorBuffer->m_ID, 0);
 
-	frameBuffer->m_DepthStencilBuffer = std::make_shared<RenderBuffer>(width, height, GL_DEPTH24_STENCIL8);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, frameBuffer->m_DepthStencilBuffer->m_ID);
+	//frameBuffer->m_DepthStencilBuffer = std::make_shared<RenderBuffer>(width, height, GL_DEPTH24_STENCIL8);
+	//glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, frameBuffer->m_DepthStencilBuffer->m_ID);
+
+	frameBuffer->m_DepthStencilBuffer = TexturesManager::Get().CreateTexture2D(width, height, GL_DEPTH24_STENCIL8);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, frameBuffer->m_DepthStencilBuffer->m_ID, 0);
 
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 	{
@@ -24,6 +27,12 @@ std::shared_ptr<FrameBuffer> FrameBuffer::CreateColorDepthStencilFrameBuffer(int
 		assert(false);
 		return nullptr;
 	}
+
+
+	glGenTextures(1, &frameBuffer->m_StencilView);
+	glTextureView(frameBuffer->m_StencilView, GL_TEXTURE_2D, frameBuffer->m_DepthStencilBuffer->m_ID, GL_DEPTH24_STENCIL8, 0, 1, 0, 1);
+	glBindTexture(GL_TEXTURE_2D, frameBuffer->m_StencilView);
+	glTexParameteri(GL_TEXTURE_2D, GL_DEPTH_STENCIL_TEXTURE_MODE, GL_STENCIL_INDEX);
 
 	frameBuffer->Unbind();
 

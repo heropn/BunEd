@@ -9,7 +9,7 @@ void ShadersManager::Init()
 	AddShader(ShaderType::MeshTex, "Assets/Shaders/MeshTex.vs", "Assets/Shaders/MeshTex.ps");
 	AddShader(ShaderType::MeshColor, "Assets/Shaders/MeshColor.vs", "Assets/Shaders/MeshColor.ps");
 	AddShader(ShaderType::DepthVisualizer, "Assets/Shaders/DepthVisualize.vs", "Assets/Shaders/DepthVisualize.ps");
-	AddShader(ShaderType::StencilOutline, "Assets/Shaders/StencilOutline.vs", "Assets/Shaders/StencilOutline.ps");
+	AddShader(ShaderType::StencilOutlinePP, "Assets/Shaders/StencilOutlinePP.vs", "Assets/Shaders/StencilOutlinePP.ps");
 }
 
 void ShadersManager::AddShader(const ShaderType type, const std::string& vertexShaderFilePath, const std::string& fragmentShaderFilePath)

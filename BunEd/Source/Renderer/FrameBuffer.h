@@ -28,11 +28,15 @@ public:
 	void Unbind() const;
 
 	const std::shared_ptr<Texture2D>& GetColorBufferTexture() const { return m_ColorBuffer; }
+	const std::shared_ptr<Texture2D>& GetDepthStencilBufferTexture() const { return m_DepthStencilBuffer; }
+
+	uint32_t m_StencilView = 0;
 
 private:
 
-	unsigned int m_ID = 0;
-
 	std::shared_ptr<Texture2D> m_ColorBuffer = nullptr;
-	std::shared_ptr<RenderBuffer> m_DepthStencilBuffer = nullptr;
+	std::shared_ptr<Texture2D> m_DepthStencilBuffer = nullptr;
+
+	uint32_t m_ID = 0;
+
 };

@@ -1,0 +1,42 @@
+#version 460 core
+
+out vec4 o_FragmentColor;
+
+in vec2 v_TexCoord;
+
+layout (binding = 0) uniform sampler2D u_RenderedSceneTexture;
+layout (binding = 1) uniform usampler2D u_StencilTexture;
+
+const float offset = 1.0f / 200.0f;
+const vec2 offsets[8] = vec2[](
+	vec2(-offset,  offset),
+	vec2( 0.0f,    offset),
+	vec2( offset,  offset),
+	vec2(-offset,  0.0f),
+	vec2( offset,  0.0f),
+	vec2(-offset, -offset),
+	vec2( 0.0f,   -offset),
+	vec2( offset, -offset)
+);
+
+void main()
+{
+	uint stencil = texture(u_StencilTexture, v_TexCoord).r;
+
+	if (stencil == 0)
+	{
+		for (int i = 0; i < 8; i++)
+		{
+			vec2 offsetedTexCoords = clamp(v_TexCoord + offsets[i], 0.0f, 0.9999f);
+
+			uint offsetStencil = texture(u_StencilTexture, offsetedTexCoords).r;
+			if (offsetStencil > 0)
+			{
+				o_FragmentColor = vec4(1.0f);
+				return;
+			}
+		}
+	}
+
+	o_FragmentColor = texture(u_RenderedSceneTexture, v_TexCoord);
+}
