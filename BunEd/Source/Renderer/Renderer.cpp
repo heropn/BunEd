@@ -1,16 +1,20 @@
 #include "pch.h"
 #include "Renderer.h"
-#include <queue>
 #include <format>
 #include "glad/glad.h"
 #include "Camera/Camera.h"
+#include "FrameBuffer.h"
 #include "GameObjects/GameObject.h"
 #include "GameObjects/Lights.h"
 #include "Material.h"
 #include "Mesh/Mesh.h"
+#include "IndexBuffer.h"
 #include "Texture2D.h"
 #include "Scenes/Scene.h"
 #include "Shader.h"
+#include "VertexArray.h"
+#include "VertexBuffer.h"
+#include "VertexBufferLayout.h"
 
 Renderer Renderer::s_Instance;
 
@@ -55,6 +59,29 @@ bool Renderer::Init(int width, int height)
 
 	ChangeViewportSize(width, height);
 
+	float vertexData[] = {
+	-1.0f,  1.0f, 0.0f, 1.0f,
+	-1.0f, -1.0f, 0.0f, 0.0f,
+	 1.0f, -1.0f, 1.0f, 0.0f,
+	 1.0f,  1.0f, 1.0f, 1.0f
+	};
+
+	m_ScreenVertexBuffer = std::make_unique<VertexBuffer>(vertexData, 4 * 4 * sizeof(float));
+
+	uint32_t indicesData[] = {
+		0, 1, 2,
+		2, 3, 0
+	};
+
+	m_ScreenIndexBuffer = std::make_unique<IndexBuffer>(indicesData, 3 * 2 * sizeof(uint32_t));
+
+	VertexBufferLayout layout;
+	layout.Push(2, GL_FLOAT, false);
+	layout.Push(2, GL_FLOAT, false);
+
+	m_ScreenVertexArray = std::make_unique<VertexArray>();
+	m_ScreenVertexArray->AddBuffer(*m_ScreenVertexBuffer, layout, *m_ScreenIndexBuffer);
+
 	return true;
 }
 
@@ -65,13 +92,28 @@ void Renderer::Shutdown()
 
 void Renderer::Render(const std::shared_ptr<Scene>& scene)
 {
+	Clear();
+
 	if (m_VisualizeDepth)
 	{
 		RenderDepth(scene);
 		return;
 	}
 
+	m_OffScreenFrameBuffer->Bind();
+
+	Clear();
 	RenderScene(scene);
+
+	m_OffScreenFrameBuffer->Unbind();
+
+	ShadersManager::Get().GetShader(ShaderType::ScreenRender)->Bind();
+	m_ScreenVertexArray->Bind();
+	m_OffScreenFrameBuffer->GetColorBufferTexture()->Bind(0);
+
+	glDrawElements(GL_TRIANGLES, m_ScreenIndexBuffer->GetCount(), GL_UNSIGNED_INT, (const void*)0);
+
+	m_OffScreenFrameBuffer->GetColorBufferTexture()->Unbind();
 }
 
 void Renderer::Clear()
@@ -88,6 +130,8 @@ void Renderer::SwapBuffers()
 void Renderer::ChangeViewportSize(int width, int height)
 {
 	glViewport(0, 0, width, height);
+
+	m_OffScreenFrameBuffer = FrameBuffer::CreateColorDepthStencilFrameBuffer(width, height);
 }
 
 void Renderer::RenderScene(const std::shared_ptr<Scene>& scene)

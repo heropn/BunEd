@@ -5,7 +5,7 @@
 
 enum class ShaderType
 {
-	Default,
+	ScreenRender,
 	MeshTex,
 	MeshColor,
 	DepthVisualizer,

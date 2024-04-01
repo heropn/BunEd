@@ -1,8 +1,12 @@
 #pragma once
 #include <memory>
 
+class FrameBuffer;
 class GameObject;
+class IndexBuffer;
 class Scene;
+class VertexArray;
+class VertexBuffer;
 
 class Renderer
 {
@@ -32,6 +36,12 @@ private:
 	void RenderGameObject(const std::shared_ptr<GameObject>& gameObj, const std::shared_ptr<Scene>& scene);
 
 	static Renderer s_Instance;
+
+	std::shared_ptr<FrameBuffer> m_OffScreenFrameBuffer = nullptr;
+
+	std::unique_ptr<VertexBuffer> m_ScreenVertexBuffer = nullptr;
+	std::unique_ptr<IndexBuffer> m_ScreenIndexBuffer = nullptr;
+	std::unique_ptr<VertexArray> m_ScreenVertexArray = nullptr;
 
 	bool m_VisualizeDepth = false;
 };

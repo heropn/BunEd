@@ -6,6 +6,7 @@ class Texture2D
 public:
 
 	Texture2D(const std::string& filePath);
+	Texture2D(int32_t width, int32_t height, int32_t format);
 	~Texture2D();
 
 	void Bind(int index);
@@ -15,6 +16,8 @@ public:
 
 private:
 
+	friend class FrameBuffer;
+
 	void GenerateTexture(const unsigned char* data);
 
 #ifdef _DEBUG
@@ -23,7 +26,7 @@ private:
 
 	int m_Height = 0;
 	int m_Width = 0;
-	int m_CompNum = 0;
+	int m_Format = 0;
 	int m_BoundIndex = -1;
 	unsigned int m_ID = 0;
 };

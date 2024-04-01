@@ -4,6 +4,11 @@
 
 TexturesManager TexturesManager::s_Instance;
 
+std::shared_ptr<Texture2D> TexturesManager::CreateTexture2D(int32_t width, int32_t height, int32_t format)
+{
+	return std::make_shared<Texture2D>(width, height, format);
+}
+
 std::shared_ptr<Texture2D> TexturesManager::FindOrCreateTexture2D(const std::string& filePath)
 {
 	std::shared_ptr<Texture2D> texture = FindTexture2D(filePath);

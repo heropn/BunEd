@@ -10,6 +10,8 @@
 #include "Mesh/Mesh.h"
 #include "Renderer/Texture2D.h"
 
+#include "Renderer/FrameBuffer.h"
+
 Application Application::s_Instance;
 
 bool Application::Init()
@@ -56,14 +58,12 @@ void Application::Run()
 
 		m_Scene->Update(m_DeltaTime);
 
-		renderer.Clear();
+		renderer.Render(m_Scene);
 
 		if (show_demo_window)
 			ImGui::ShowDemoWindow(&show_demo_window);
 
 		m_ImGuiLayer.Render();
-
-		renderer.Render(m_Scene);
 
 		m_ImGuiLayer.PostRender();
 

@@ -5,7 +5,7 @@ ShadersManager ShadersManager::s_Instance;
 
 void ShadersManager::Init()
 {
-	AddShader(ShaderType::Default, "Assets/Shaders/default.vs", "Assets/Shaders/default.ps");
+	AddShader(ShaderType::ScreenRender, "Assets/Shaders/ScreenRender.vs", "Assets/Shaders/ScreenRender.ps");
 	AddShader(ShaderType::MeshTex, "Assets/Shaders/MeshTex.vs", "Assets/Shaders/MeshTex.ps");
 	AddShader(ShaderType::MeshColor, "Assets/Shaders/MeshColor.vs", "Assets/Shaders/MeshColor.ps");
 	AddShader(ShaderType::DepthVisualizer, "Assets/Shaders/DepthVisualize.vs", "Assets/Shaders/DepthVisualize.ps");

@@ -10,10 +10,28 @@ Texture2D::Texture2D(const std::string& filePath)
 {
 	stbi_set_flip_vertically_on_load(true);
 	// Currently 4-components, because some textures were invalid
-	unsigned char* imageData = stbi_load(filePath.c_str(), &m_Width, &m_Height, &m_CompNum, 4);
+	int compNum = 0;
+	unsigned char* imageData = stbi_load(filePath.c_str(), &m_Width, &m_Height, &compNum, 4);
 
 	if (imageData)
 	{
+		switch (compNum)
+		{
+		case 1:
+			m_Format = GL_RED;
+			break;
+		case 3:
+			m_Format = GL_RGB;
+			break;
+		case 4:
+			m_Format = GL_RGBA;
+			break;
+		default:
+			printf("Unknown number of components in texture");
+			__debugbreak();
+			break;
+		}
+
 		GenerateTexture(imageData);
 		stbi_image_free(imageData);
 	}
@@ -21,6 +39,15 @@ Texture2D::Texture2D(const std::string& filePath)
 	{
 		printf("Unable to load image data from file %s", filePath.c_str());
 	}
+}
+
+Texture2D::Texture2D(int32_t width, int32_t height, int32_t format)
+{
+	m_Width = width;
+	m_Height = height;
+	m_Format = format;
+
+	GenerateTexture(nullptr);
 }
 
 Texture2D::~Texture2D()
@@ -47,29 +74,9 @@ void Texture2D::GenerateTexture(const unsigned char* data)
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-	int format = GL_RGB;
-
-	switch (m_CompNum)
-	{
-	case 1:
-		format = GL_RED;
-		break;
-	case 3:
-		format = GL_RGB;
-		break;
-	case 4:
-		format = GL_RGBA;
-		break;
-	default:
-		printf("Unknown number of components in texture");
-		__debugbreak();
-		break;
-	}
-
-	// Currently hardcoded, because some textures were displayed inproperly
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_Width, m_Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-	glGenerateMipmap(GL_TEXTURE_2D);
+	glTexImage2D(GL_TEXTURE_2D, 0, m_Format, m_Width, m_Height, 0, m_Format, GL_UNSIGNED_BYTE, data);
+	//glGenerateMipmap(GL_TEXTURE_2D);
 }
