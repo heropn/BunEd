@@ -1,0 +1,26 @@
+#version 460 core
+in vec3 v_Normal;
+in vec3 v_FragPos;
+
+out vec4 o_FragmentColor;
+
+uniform vec3 u_EyePos;
+
+layout(binding = 3) uniform samplerCube u_Skybox;
+
+void main()
+{
+	vec3 fromEye = normalize(v_FragPos - u_EyePos);
+
+	if (false) // reflect
+	{
+		vec3 reflection = reflect(fromEye, v_Normal);
+		o_FragmentColor = vec4(texture(u_Skybox, reflection).rgb, 1.0f);
+	}
+	else // refract
+	{
+		float ratio = 1.0f / 1.52f;
+		vec3 refraction = refract(fromEye, v_Normal, ratio);
+		o_FragmentColor = vec4(texture(u_Skybox, refraction).rgb, 1.0f);
+	}
+}

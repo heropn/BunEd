@@ -22,15 +22,16 @@ public:
 	void SetUniform1i(const std::string& uniformName, int i1);
 
 	void SetUniformMatrix4f(const std::string& uniformName, const glm::mat4& matrix) const;
+	void SetUniformMatrix3f(const std::string& uniformName, const glm::mat3& matrix) const;
 
 private:
 
 	void CreateShaderProgram(const std::string& vertexShaderFilePath, const std::string& fragmentShaderFilePath);
-	void CompileShader(const unsigned int shaderID) const;
+	void CompileShader(const uint32_t shaderID) const;
 
 	std::string GetShaderSourceFromFile(const std::string& shaderFilePath) const;
 
 	int GetUniformLocation(const std::string& uniformName) const;
 
-	unsigned int m_ID = 0;
+	uint32_t m_ID = 0;
 };

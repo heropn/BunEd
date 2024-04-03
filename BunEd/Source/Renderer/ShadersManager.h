@@ -9,7 +9,9 @@ enum class ShaderType
 	MeshTex,
 	MeshColor,
 	DepthVisualizer,
-	StencilOutlinePP
+	StencilOutlinePP,
+	SkyBox,
+	EnviromentMapping
 };
 
 class ShadersManager

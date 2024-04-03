@@ -9,10 +9,12 @@ public:
 	Texture2D(int32_t width, int32_t height, int32_t format);
 	~Texture2D();
 
-	void Bind(int index);
+	void Bind(int32_t index);
 	void Unbind();
 
+#ifdef _DEBUG
 	const std::string& GetFilePath() const { return m_FilePath; }
+#endif
 
 private:
 
@@ -24,9 +26,9 @@ private:
 	std::string m_FilePath;
 #endif
 
-	int m_Height = 0;
-	int m_Width = 0;
-	int m_Format = 0;
-	int m_BoundIndex = -1;
-	unsigned int m_ID = 0;
+	int32_t m_Height = 0;
+	int32_t m_Width = 0;
+	int32_t m_Format = 0;
+	int32_t m_BoundIndex = -1;
+	uint32_t m_ID = 0;
 };

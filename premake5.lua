@@ -18,6 +18,8 @@ project "BunEd"
 	kind "ConsoleApp"
 	language "C++"
 	staticruntime "Off"
+	cppdialect "C++20"
+	systemversion "latest"
 	
 	targetdir ("bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}/%{prj.name}")
 	objdir ("bin-int/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}/%{prj.name}")
@@ -50,10 +52,6 @@ project "BunEd"
 	
 	pchheader "pch.h"
 	pchsource "%{prj.name}/Source/pch.cpp"
-	
-	filter "system:windows"
-	cppdialect "C++17"
-	systemversion "latest"
 
 	filter "configurations:Debug"
 		runtime "Debug"

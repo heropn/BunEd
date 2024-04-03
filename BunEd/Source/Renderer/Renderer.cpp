@@ -10,6 +10,7 @@
 #include "Mesh/Mesh.h"
 #include "IndexBuffer.h"
 #include "Texture2D.h"
+#include "Texture3D.h"
 #include "Scenes/Scene.h"
 #include "Shader.h"
 #include "VertexArray.h"
@@ -18,8 +19,7 @@
 
 Renderer Renderer::s_Instance;
 
-void GLAPIENTRY
-MessageCallback(uint32_t source, uint32_t type, uint32_t id, uint32_t severity, int32_t length, const char* message, const void* userParam)
+void GLAPIENTRY MessageCallback(uint32_t source, uint32_t type, uint32_t id, uint32_t severity, int32_t length, const char* message, const void* userParam)
 {
 	if (type == GL_DEBUG_TYPE_OTHER)
 	{
@@ -46,7 +46,7 @@ bool Renderer::Init(int width, int height)
 #endif
 
 	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LESS);
+	glDepthFunc(GL_LEQUAL);
 
 	glEnable(GL_CULL_FACE);
 	glFrontFace(GL_CCW);
@@ -58,29 +58,8 @@ bool Renderer::Init(int width, int height)
 	//glEnable(GL_STENCIL_TEST);
 
 	ChangeViewportSize(width, height);
-
-	float vertexData[] = {
-	-1.0f,  1.0f, 0.0f, 1.0f,
-	-1.0f, -1.0f, 0.0f, 0.0f,
-	 1.0f, -1.0f, 1.0f, 0.0f,
-	 1.0f,  1.0f, 1.0f, 1.0f
-	};
-
-	m_ScreenVertexBuffer = std::make_unique<VertexBuffer>(vertexData, 4 * 4 * sizeof(float));
-
-	uint32_t indicesData[] = {
-		0, 1, 2,
-		2, 3, 0
-	};
-
-	m_ScreenIndexBuffer = std::make_unique<IndexBuffer>(indicesData, 3 * 2 * sizeof(uint32_t));
-
-	VertexBufferLayout layout;
-	layout.Push(2, GL_FLOAT, false);
-	layout.Push(2, GL_FLOAT, false);
-
-	m_ScreenVertexArray = std::make_unique<VertexArray>();
-	m_ScreenVertexArray->AddBuffer(*m_ScreenVertexBuffer, layout, *m_ScreenIndexBuffer);
+	CreateOffScreenBufferDrawData();
+	CreateSkyBoxData();
 
 	return true;
 }
@@ -103,14 +82,26 @@ void Renderer::Render(const std::shared_ptr<Scene>& scene)
 	m_OffScreenFrameBuffer->Bind();
 
 	Clear();
+
 	RenderScene(scene);
+
+	// Skybox
+	std::shared_ptr<Shader> skyBoxShader = ShadersManager::Get().GetShader(ShaderType::SkyBox);
+	skyBoxShader->Bind();
+	skyBoxShader->SetUniformMatrix4f("u_PV", scene->GetCamera().GetProjectionMatrix() * glm::mat4(glm::mat3(scene->GetCamera().GetViewMatrix())));
+
+	m_SkyboxVertexArray->Bind();
+	m_SkyBoxTexture->Bind(0);
+	glDrawElements(GL_TRIANGLES, m_SkyboxIndexBuffer->GetCount(), GL_UNSIGNED_INT, (const void*)0);
+	m_SkyBoxTexture->Unbind();
 
 	m_OffScreenFrameBuffer->Unbind();
 
+	// Post process
 	ShadersManager::Get().GetShader(ShaderType::StencilOutlinePP)->Bind();
 	m_ScreenVertexArray->Bind();
 	m_OffScreenFrameBuffer->GetColorBufferTexture()->Bind(0);
-	glBindTextureUnit(1, m_OffScreenFrameBuffer->m_StencilView);
+	glBindTextureUnit(1, m_OffScreenFrameBuffer->GetStencilBufferTextureViewId());
 
 	glDrawElements(GL_TRIANGLES, m_ScreenIndexBuffer->GetCount(), GL_UNSIGNED_INT, (const void*)0);
 
@@ -216,6 +207,8 @@ void Renderer::RenderGameObject(const std::shared_ptr<GameObject>& gameObj, cons
 	shader->SetUniformMatrix4f("u_Model", gameObj->GetTransform());
 	shader->SetUniformMatrix4f("u_PV", PVMatrix);
 	shader->SetUniform3f("u_EyePos", cameraPos);
+	
+	m_SkyBoxTexture->Bind(3);
 
 	if (lightData.m_DirLight.isEnabled())
 	{
@@ -293,4 +286,92 @@ void Renderer::RenderGameObject(const std::shared_ptr<GameObject>& gameObj, cons
 
 		glDrawElements(GL_TRIANGLES, submesh->m_IndexBuffer->GetCount(), GL_UNSIGNED_INT, (const void*)0);
 	}
+}
+
+void Renderer::CreateOffScreenBufferDrawData()
+{
+	float vertexData[] = {
+		-1.0f,  1.0f, 0.0f, 1.0f,
+		-1.0f, -1.0f, 0.0f, 0.0f,
+		 1.0f, -1.0f, 1.0f, 0.0f,
+		 1.0f,  1.0f, 1.0f, 1.0f
+	};
+
+	m_ScreenVertexBuffer = std::make_unique<VertexBuffer>(vertexData, 4 * 4 * sizeof(float));
+
+	uint32_t indicesData[] = {
+		0, 1, 2,
+		2, 3, 0
+	};
+
+	m_ScreenIndexBuffer = std::make_unique<IndexBuffer>(indicesData, 3 * 2 * sizeof(uint32_t));
+
+	VertexBufferLayout layout;
+	layout.Push(2, GL_FLOAT, false);
+	layout.Push(2, GL_FLOAT, false);
+
+	m_ScreenVertexArray = std::make_unique<VertexArray>();
+	m_ScreenVertexArray->AddBuffer(*m_ScreenVertexBuffer, layout, *m_ScreenIndexBuffer);
+}
+
+void Renderer::CreateSkyBoxData()
+{
+	std::vector<std::string> skyboxFiles = {
+		"Assets/Textures/Skybox/right.jpg",
+		"Assets/Textures/Skybox/left.jpg",
+		"Assets/Textures/Skybox/top.jpg",
+		"Assets/Textures/Skybox/bottom.jpg",
+		"Assets/Textures/Skybox/front.jpg",
+		"Assets/Textures/Skybox/back.jpg",
+	};
+
+	m_SkyBoxTexture = std::make_unique<Texture3D>(skyboxFiles);
+
+	float skyboxVertices[] = {
+		-1.0f, -1.0f,  1.0f, // A 0
+		 1.0f, -1.0f,  1.0f, // B 1
+		 1.0f,  1.0f,  1.0f, // C 2
+		-1.0f,  1.0f,  1.0f, // D 3
+
+		-1.0f, -1.0f, -1.0f, // E 4
+		 1.0f, -1.0f, -1.0f, // F 5
+		 1.0f,  1.0f, -1.0f, // G 6
+		-1.0f,  1.0f, -1.0f, // H 7
+	};
+
+	m_SkyboxVertexBuffer = std::make_unique<VertexBuffer>(skyboxVertices, sizeof(skyboxVertices));
+
+	uint32_t indices[] = {
+		// front
+		2, 1, 0,
+		0, 3, 2,
+
+		// back
+		7, 4, 5,
+		5, 6, 7,
+
+		// top
+		6, 2, 3,
+		3, 7, 6,
+
+		// bottom
+		1, 5, 4,
+		4, 0, 1,
+
+		// right
+		6, 5, 1,
+		1, 2, 6,
+
+		// left
+		3, 0, 4,
+		4, 7, 3
+	};
+
+	m_SkyboxIndexBuffer = std::make_unique<IndexBuffer>(indices, sizeof(indices));
+
+	VertexBufferLayout layout;
+	layout.Push(3, GL_FLOAT, false);
+
+	m_SkyboxVertexArray = std::make_unique<VertexArray>();
+	m_SkyboxVertexArray->AddBuffer(*m_SkyboxVertexBuffer, layout, *m_SkyboxIndexBuffer);
 }

@@ -10,7 +10,7 @@ Texture2D::Texture2D(const std::string& filePath)
 {
 	stbi_set_flip_vertically_on_load(true);
 	// Currently 4-components, because some textures were invalid
-	int compNum = 0;
+	int32_t compNum = 0;
 	unsigned char* imageData = stbi_load(filePath.c_str(), &m_Width, &m_Height, &compNum, 4);
 
 	if (imageData)
@@ -55,7 +55,7 @@ Texture2D::~Texture2D()
 	glDeleteTextures(1, &m_ID);
 }
 
-void Texture2D::Bind(int index)
+void Texture2D::Bind(int32_t index)
 {
 	m_BoundIndex = index;
 	glBindTextureUnit(m_BoundIndex, m_ID);

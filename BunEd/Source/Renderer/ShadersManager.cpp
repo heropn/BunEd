@@ -10,6 +10,8 @@ void ShadersManager::Init()
 	AddShader(ShaderType::MeshColor, "Assets/Shaders/MeshColor.vs", "Assets/Shaders/MeshColor.ps");
 	AddShader(ShaderType::DepthVisualizer, "Assets/Shaders/DepthVisualize.vs", "Assets/Shaders/DepthVisualize.ps");
 	AddShader(ShaderType::StencilOutlinePP, "Assets/Shaders/StencilOutlinePP.vs", "Assets/Shaders/StencilOutlinePP.ps");
+	AddShader(ShaderType::SkyBox, "Assets/Shaders/SkyBox.vs", "Assets/Shaders/SkyBox.ps");
+	AddShader(ShaderType::EnviromentMapping, "Assets/Shaders/EnviromentMapping.vs", "Assets/Shaders/EnviromentMapping.ps");
 }
 
 void ShadersManager::AddShader(const ShaderType type, const std::string& vertexShaderFilePath, const std::string& fragmentShaderFilePath)

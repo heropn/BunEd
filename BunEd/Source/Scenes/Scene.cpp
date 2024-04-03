@@ -14,10 +14,10 @@ Scene::Scene()
 {
 	m_Camera.Init(glm::vec3(0.0f, 0.0f, 10.0f));
 
-	std::shared_ptr<Mesh> mesh = Mesh::CreateMesh("Assets/Models/Bunny/bunny_old.obj");
+	std::shared_ptr<Mesh> mesh = Mesh::CreateMesh("Assets/Models/Bunny/bunny.obj");
 
 	std::shared_ptr<GameObject> gameObj = std::make_shared<GameObject>();
-	gameObj->m_Material.m_Shader = ShadersManager::Get().GetShader(ShaderType::MeshColor);
+	gameObj->m_Material.m_Shader = ShadersManager::Get().GetShader(ShaderType::EnviromentMapping);
 	gameObj->SetMesh(mesh);
 	m_GameObjects.push_back(gameObj);
 
