@@ -9,10 +9,11 @@
 #include "Material.h"
 #include "Mesh/Mesh.h"
 #include "IndexBuffer.h"
-#include "Texture2D.h"
-#include "Texture3D.h"
 #include "Scenes/Scene.h"
 #include "Shader.h"
+#include "Texture2D.h"
+#include "Texture3D.h"
+#include "UniformBuffer.h"
 #include "VertexArray.h"
 #include "VertexBuffer.h"
 #include "VertexBufferLayout.h"
@@ -60,6 +61,13 @@ bool Renderer::Init(int width, int height)
 	ChangeViewportSize(width, height);
 	CreateOffScreenBufferDrawData();
 	CreateSkyBoxData();
+
+	m_LightsUniformBuffer = std::make_unique<UniformBuffer>(nullptr,
+		  sizeof(DirectionalLight::DirectionalLightData)
+		/*+ 4 * sizeof(PointLight::PointLightData)
+		+ 4 * sizeof(SpotLight::SpotLightData)
+		+ 4 * sizeof(int)*/);
+	m_LightsUniformBuffer->Bind(0);
 
 	return true;
 }
@@ -134,9 +142,7 @@ void Renderer::RenderScene(const std::shared_ptr<Scene>& scene)
 	glStencilFunc(GL_ALWAYS, 1, 0xff);
 	glStencilMask(0xff);
 
-	const glm::mat4x4& PVMatrix = scene->GetProjViewMatrix();
 	const glm::vec3& cameraPos = scene->GetCameraPos();
-	const SceneLightData& lightData = scene->GetSceneLightData();
 	const std::vector<std::shared_ptr<GameObject>>& gameObjects = scene->GetGameObjects();
 
 	std::vector<std::shared_ptr<GameObject>> translucentObjects;
@@ -210,18 +216,21 @@ void Renderer::RenderGameObject(const std::shared_ptr<GameObject>& gameObj, cons
 	
 	m_SkyBoxTexture->Bind(3);
 
+	UpdateLightsUniformBuffer(lightData);
+	m_LightsUniformBuffer->Bind(0);
+
 	if (lightData.m_DirLight.isEnabled())
 	{
-		shader->SetUniform3f("u_DirLight.m_Ambient", lightData.m_DirLight.m_Color.m_Ambient);
-		shader->SetUniform3f("u_DirLight.m_Diffuse", lightData.m_DirLight.m_Color.m_Diffuse);
-		shader->SetUniform3f("u_DirLight.m_Specular", lightData.m_DirLight.m_Color.m_Specular);
-		shader->SetUniform3f("u_DirLight.m_Direction", lightData.m_DirLight.GetDirection());
+		//shader->SetUniform3f("u_DirLight.m_Color.m_Ambient", lightData.m_DirLight.m_Data.m_Color.m_Ambient);
+		//shader->SetUniform3f("u_DirLight.m_Color.m_Diffuse", lightData.m_DirLight.m_Data.m_Color.m_Diffuse);
+		//shader->SetUniform3f("u_DirLight.m_Color.m_Specular", lightData.m_DirLight.m_Data.m_Color.m_Specular);
+		//shader->SetUniform3f("u_DirLight.m_Direction", lightData.m_DirLight.m_Data.m_Direction);
 	}
 	else
 	{
-		shader->SetUniform3f("u_DirLight.m_Ambient", glm::zero<glm::vec3>());
-		shader->SetUniform3f("u_DirLight.m_Diffuse", glm::zero<glm::vec3>());
-		shader->SetUniform3f("u_DirLight.m_Specular", glm::zero<glm::vec3>());
+		//shader->SetUniform3f("u_DirLight.m_Ambient", glm::zero<glm::vec3>());
+		//shader->SetUniform3f("u_DirLight.m_Diffuse", glm::zero<glm::vec3>());
+		//shader->SetUniform3f("u_DirLight.m_Specular", glm::zero<glm::vec3>());
 	}
 
 	int pointLightsEnabledCount = 0;
@@ -230,11 +239,11 @@ void Renderer::RenderGameObject(const std::shared_ptr<GameObject>& gameObj, cons
 		const PointLight& pointLight = lightData.m_PointLights[i];
 		if (pointLight.isEnabled())
 		{
-			shader->SetUniform3f(std::format("u_PointLights[{}].m_Ambient", pointLightsEnabledCount), pointLight.m_Color.m_Ambient);
-			shader->SetUniform3f(std::format("u_PointLights[{}].m_Diffuse", pointLightsEnabledCount), pointLight.m_Color.m_Diffuse);
-			shader->SetUniform3f(std::format("u_PointLights[{}].m_Specular", pointLightsEnabledCount), pointLight.m_Color.m_Specular);
-			shader->SetUniform3f(std::format("u_PointLights[{}].m_Position", pointLightsEnabledCount), pointLight.GetPosition());
-			shader->SetUniform3f(std::format("u_PointLights[{}].m_Attenuation", pointLightsEnabledCount), pointLight.GetAttenuation());
+			shader->SetUniform3f(std::format("u_PointLights[{}].m_Color.m_Ambient", pointLightsEnabledCount), pointLight.m_Data.m_Color.m_Ambient);
+			shader->SetUniform3f(std::format("u_PointLights[{}].m_Color.m_Diffuse", pointLightsEnabledCount), pointLight.m_Data.m_Color.m_Diffuse);
+			shader->SetUniform3f(std::format("u_PointLights[{}].m_Color.m_Specular", pointLightsEnabledCount), pointLight.m_Data.m_Color.m_Specular);
+			shader->SetUniform3f(std::format("u_PointLights[{}].m_Position", pointLightsEnabledCount), pointLight.m_Data.m_Position);
+			shader->SetUniform3f(std::format("u_PointLights[{}].m_Attenuation", pointLightsEnabledCount), pointLight.m_Data.m_Attenuation);
 			pointLightsEnabledCount++;
 		}
 	}
@@ -247,13 +256,13 @@ void Renderer::RenderGameObject(const std::shared_ptr<GameObject>& gameObj, cons
 		const SpotLight& spotLight = lightData.m_SpotLights[i];
 		if (spotLight.isEnabled())
 		{
-			shader->SetUniform3f(std::format("u_SpotLights[{}].m_Ambient", spotLightsEnabledCount), spotLight.m_Color.m_Ambient);
-			shader->SetUniform3f(std::format("u_SpotLights[{}].m_Diffuse", spotLightsEnabledCount), spotLight.m_Color.m_Diffuse);
-			shader->SetUniform3f(std::format("u_SpotLights[{}].m_Specular", spotLightsEnabledCount), spotLight.m_Color.m_Specular);
-			shader->SetUniform3f(std::format("u_SpotLights[{}].m_Position", spotLightsEnabledCount), spotLight.GetPosition());
-			shader->SetUniform3f(std::format("u_SpotLights[{}].m_Direction", spotLightsEnabledCount), spotLight.GetDirection());
-			shader->SetUniform1f(std::format("u_SpotLights[{}].m_InnerCutOffAngleCos", spotLightsEnabledCount), spotLight.GetInnerCutOffAngleCos());
-			shader->SetUniform1f(std::format("u_SpotLights[{}].m_OuterCutOffAngleCos", spotLightsEnabledCount), spotLight.GetOuterCutOffAngleCos());
+			shader->SetUniform3f(std::format("u_SpotLights[{}].m_Color.m_Ambient", spotLightsEnabledCount), spotLight.m_Data.m_Color.m_Ambient);
+			shader->SetUniform3f(std::format("u_SpotLights[{}].m_Color.m_Diffuse", spotLightsEnabledCount), spotLight.m_Data.m_Color.m_Diffuse);
+			shader->SetUniform3f(std::format("u_SpotLights[{}].m_Color.m_Specular", spotLightsEnabledCount), spotLight.m_Data.m_Color.m_Specular);
+			shader->SetUniform3f(std::format("u_SpotLights[{}].m_Position", spotLightsEnabledCount), spotLight.m_Data.m_Position);
+			shader->SetUniform3f(std::format("u_SpotLights[{}].m_Direction", spotLightsEnabledCount), spotLight.m_Data.m_Direction);
+			shader->SetUniform1f(std::format("u_SpotLights[{}].m_InnerCutOffAngleCos", spotLightsEnabledCount), spotLight.m_Data.m_InnerCutOffAngleCos);
+			shader->SetUniform1f(std::format("u_SpotLights[{}].m_OuterCutOffAngleCos", spotLightsEnabledCount), spotLight.m_Data.m_OuterCutOffAngleCos);
 			spotLightsEnabledCount++;
 		}
 	}
@@ -374,4 +383,25 @@ void Renderer::CreateSkyBoxData()
 
 	m_SkyboxVertexArray = std::make_unique<VertexArray>();
 	m_SkyboxVertexArray->AddBuffer(*m_SkyboxVertexBuffer, layout, *m_SkyboxIndexBuffer);
+}
+
+void Renderer::UpdateLightsUniformBuffer(const SceneLightData& lightData)
+{
+	m_LightsUniformBuffer->UpdateBufferData(0, sizeof(DirectionalLight::DirectionalLightData), &lightData.m_DirLight);
+	//m_LightsUniformBuffer->UpdateBufferData(sizeof(DirectionalLight::DirectionalLightData), 4 * sizeof(PointLight::PointLightData), lightData.m_PointLights);
+	//m_LightsUniformBuffer->UpdateBufferData(sizeof(DirectionalLight::DirectionalLightData)
+	//	+ 4 * sizeof(PointLight::PointLightData),
+	//	4 * sizeof(SpotLight::SpotLightData), lightData.m_SpotLights);
+	//
+	//int enabledLightsData[4] = {
+	//	lightData.m_DirLight.isEnabled(), // Direction Light enabled
+	//	0, // PointLightsEnabledCount
+	//	0, // SpotLightsEnabledCount
+	//	0 // Padding
+	//};
+
+	//m_LightsUniformBuffer->UpdateBufferData(sizeof(DirectionalLight::DirectionalLightData)
+	//	+ 4 * sizeof(PointLight::PointLightData)
+	//	+ 4 * sizeof(SpotLight::SpotLightData),
+	//	sizeof(enabledLightsData), enabledLightsData);
 }

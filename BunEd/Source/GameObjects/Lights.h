@@ -3,9 +3,12 @@
 
 struct LightColors
 {
-	glm::vec3 m_Ambient{};
-	glm::vec3 m_Diffuse{};
-	glm::vec3 m_Specular{};
+	glm::vec3 m_Ambient = glm::zero<glm::vec3>();
+	float pad1 = 0.0f;
+	glm::vec3 m_Diffuse = glm::zero<glm::vec3>();
+	float pad2 = 0.0f;
+	glm::vec3 m_Specular = glm::zero<glm::vec3>();
+	float pad3 = 0.0f;
 };
 
 class BaseLight
@@ -20,8 +23,6 @@ public:
 	inline void SetIsEnabled(const bool isEnabled) { m_isEnabled = isEnabled; }
 	inline bool isEnabled() const { return m_isEnabled; }
 
-	LightColors m_Color;
-
 protected:
 
 	glm::mat4x4 m_DebugTransform;
@@ -32,59 +33,56 @@ class DirectionalLight : public BaseLight
 {
 public:
 
-	DirectionalLight() : m_Direction(glm::vec3(0.0f, -1.0f, 0.0f)) {}
+	struct DirectionalLightData
+	{
+		LightColors m_Color;
+		glm::vec3 m_Direction = glm::vec3(0.0f, -1.0f, 0.0f);
+		float pad1 = 0.0f;
+	};
 
-	inline void SetDirection(const glm::vec3& dir) { m_Direction = glm::normalize(dir); }
-	inline const glm::vec3& GetDirection() const { return m_Direction; }
+	DirectionalLight() = default;
 
-private:
-
-	glm::vec3 m_Direction;
+	DirectionalLightData m_Data;
 };
 
 class PointLight : public BaseLight
 {
 public:
 
-	PointLight() : m_Position(glm::zero<glm::vec3>()), m_Attenuation(glm::vec3(1.0f, 0.22f, 0.20f)) {}
+	struct PointLightData
+	{
+		LightColors m_Color;
+		glm::vec3 m_Position = glm::zero<glm::vec3>();
+		float pad1 = 0.0f;
+		glm::vec3 m_Attenuation = glm::vec3(1.0f, 0.22f, 0.20f);
+		float pad2 = 0.0f;
+	};
 
-	inline void SetPosition(const glm::vec3& pos) { m_Position = pos; }
-	inline const glm::vec3& GetPosition() const { return m_Position; }
+	PointLight() = default;
 
-	inline void SetAttenuation(const glm::vec3& attenuation) { m_Attenuation = attenuation; }
-	inline const glm::vec3& GetAttenuation() const { return m_Attenuation; }
-
-private:
-
-	glm::vec3 m_Position;
-	glm::vec3 m_Attenuation;
+	PointLightData m_Data;
 };
 
 class SpotLight : public BaseLight
 {
 public:
 
-	SpotLight() : m_Position(glm::zero<glm::vec3>()), m_Direction(glm::vec3(0.0f, 0.0f, -1.0f)) {}
+	struct SpotLightData
+	{
+		LightColors m_Color;
+		glm::vec3 m_Position = glm::zero<glm::vec3>();
+		float m_InnerCutOffAngleCos = 0.0f;
+		glm::vec3 m_Direction = glm::vec3(0.0f, 0.0f, -1.0f);
+		float m_OuterCutOffAngleCos = 0.0f;
+	};
 
-	inline void SetPosition(const glm::vec3& pos) { m_Position = pos; }
-	inline const glm::vec3& GetPosition() const { return m_Position; }
+	SpotLight() = default;
 
-	inline void SetDirection(const glm::vec3& dir) { m_Direction = glm::normalize(dir); }
-	inline const glm::vec3& GetDirection() const { return m_Direction; }
+	inline void SetInnerCutOffAngleDeg(const float deg) { m_Data.m_InnerCutOffAngleCos = cosf(std::clamp(deg, 0.0f, 90.0f) * glm::pi<float>() / 180.0f); }
 
-	inline void SetInnerCutOffAngleDeg(const float deg) { m_InnerCutOffAngleCos = cosf(std::clamp(deg, 0.0f, 90.0f) * glm::pi<float>() / 180.0f); }
-	inline float GetInnerCutOffAngleCos() const { return m_InnerCutOffAngleCos; }
+	inline void SetOuterCutOffAngleDeg(const float deg) { m_Data.m_OuterCutOffAngleCos = cosf(std::clamp(deg, 0.0f, 90.0f) * glm::pi<float>() / 180.0f); }
 
-	inline void SetOuterCutOffAngleDeg(const float deg) { m_OuterCutOffAngleCos = cosf(std::clamp(deg, 0.0f, 90.0f) * glm::pi<float>() / 180.0f); }
-	inline float GetOuterCutOffAngleCos() const { return m_OuterCutOffAngleCos; }
-
-private:
-
-	glm::vec3 m_Position;
-	glm::vec3 m_Direction;
-
-	float m_InnerCutOffAngleCos = 0.9f;
-	float m_OuterCutOffAngleCos = 0.8f;
+	SpotLightData m_Data;
 };
 
 /*

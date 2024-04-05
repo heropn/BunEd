@@ -4,8 +4,10 @@
 class FrameBuffer;
 class GameObject;
 class IndexBuffer;
-class Texture3D;
 class Scene;
+class SceneLightData;
+class Texture3D;
+class UniformBuffer;
 class VertexArray;
 class VertexBuffer;
 
@@ -39,6 +41,8 @@ private:
 	void CreateOffScreenBufferDrawData();
 	void CreateSkyBoxData();
 
+	void UpdateLightsUniformBuffer(const SceneLightData& lightData);
+
 	static Renderer s_Instance;
 
 	std::shared_ptr<FrameBuffer> m_OffScreenFrameBuffer = nullptr;
@@ -51,6 +55,8 @@ private:
 	std::unique_ptr<VertexBuffer> m_SkyboxVertexBuffer = nullptr;
 	std::unique_ptr<IndexBuffer> m_SkyboxIndexBuffer = nullptr;
 	std::unique_ptr<VertexArray> m_SkyboxVertexArray = nullptr;
+
+	std::unique_ptr<UniformBuffer> m_LightsUniformBuffer = nullptr;
 
 	bool m_VisualizeDepth = false;
 };

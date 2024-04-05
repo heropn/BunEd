@@ -12,9 +12,7 @@ public:
 	void Bind(int32_t index);
 	void Unbind();
 
-#ifdef _DEBUG
 	const std::string& GetFilePath() const { return m_FilePath; }
-#endif
 
 private:
 
@@ -22,9 +20,7 @@ private:
 
 	void GenerateTexture(const unsigned char* data);
 
-#ifdef _DEBUG
 	std::string m_FilePath;
-#endif
 
 	int32_t m_Height = 0;
 	int32_t m_Width = 0;
