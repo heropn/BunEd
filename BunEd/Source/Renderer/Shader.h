@@ -5,7 +5,7 @@
 class Shader
 {
 public:
-	Shader(const std::string& vertexShaderFilePath, const std::string& fragmentShaderFilePath);
+	Shader(const std::string& vertexShaderFilePath, const std::string& fragmentShaderFilePath, const std::string& geometryShaderFilePath = "");
 
 	~Shader();
 
@@ -26,7 +26,7 @@ public:
 
 private:
 
-	void CreateShaderProgram(const std::string& vertexShaderFilePath, const std::string& fragmentShaderFilePath);
+	void CreateShaderProgram(const std::string& vertexShaderFilePath, const std::string& fragmentShaderFilePath, const std::string& geometryShaderFilePath);
 	void CompileShader(const uint32_t shaderID) const;
 
 	std::string GetShaderSourceFromFile(const std::string& shaderFilePath) const;

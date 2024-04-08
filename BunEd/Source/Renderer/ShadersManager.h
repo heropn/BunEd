@@ -11,7 +11,8 @@ enum class ShaderType
 	DepthVisualizer,
 	StencilOutlinePP,
 	SkyBox,
-	EnviromentMapping
+	EnviromentMapping,
+	NormalVisualizer
 };
 
 class ShadersManager
@@ -25,7 +26,7 @@ public:
 
 	void Init();
 
-	void AddShader(const ShaderType type, const std::string& vertexShaderFilePath, const std::string& fragmentShaderFilePath);
+	void AddShader(const ShaderType type, const std::string& vertexShaderFilePath, const std::string& fragmentShaderFilePath, const std::string& geometryShaderFilePath = "");
 
 	std::shared_ptr<Shader> GetShader(const ShaderType type);
 

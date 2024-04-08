@@ -24,7 +24,7 @@ Scene::Scene()
 	gameObj = std::make_shared<GameObject>();
 	gameObj->m_Material.m_Shader = ShadersManager::Get().GetShader(ShaderType::MeshColor);
 	gameObj->SetMesh(mesh);
-	gameObj->SetTransform(glm::translate(glm::identity<glm::mat4x4>(), glm::vec3(1.0f, 1.0f, -2.0f)));
+	gameObj->SetTransform(glm::rotate(glm::translate(glm::identity<glm::mat4x4>(), glm::vec3(1.0f, 1.0f, -3.0f)), 1.0f, glm::vec3(1.0f, 1.0f, 0.0f)));
 	m_GameObjects.push_back(gameObj);
 
 	m_LightData.m_DirLight.SetIsEnabled(true);

@@ -34,6 +34,7 @@ private:
 	Renderer() = default;
 
 	void RenderScene(const std::shared_ptr<Scene>& scene);
+	void RenderSceneNormals(const std::shared_ptr<Scene>& scene);
 	void RenderDepth(const std::shared_ptr<Scene>& scene);
 
 	void RenderGameObject(const std::shared_ptr<GameObject>& gameObj, const std::shared_ptr<Scene>& scene);
@@ -59,4 +60,5 @@ private:
 	std::unique_ptr<UniformBuffer> m_LightsUniformBuffer = nullptr;
 
 	bool m_VisualizeDepth = false;
+	bool m_VisualizeNormals = false;
 };

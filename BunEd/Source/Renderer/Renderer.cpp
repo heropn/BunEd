@@ -93,6 +93,11 @@ void Renderer::Render(const std::shared_ptr<Scene>& scene)
 
 	RenderScene(scene);
 
+	if (m_VisualizeNormals)
+	{
+		RenderSceneNormals(scene);
+	}
+
 	// Skybox
 	std::shared_ptr<Shader> skyBoxShader = ShadersManager::Get().GetShader(ShaderType::SkyBox);
 	skyBoxShader->Bind();
@@ -175,6 +180,29 @@ void Renderer::RenderScene(const std::shared_ptr<Scene>& scene)
 	}
 
 	glDisable(GL_STENCIL_TEST);
+}
+
+void Renderer::RenderSceneNormals(const std::shared_ptr<Scene>& scene)
+{
+	ShadersManager::Get().GetShader(ShaderType::NormalVisualizer)->Bind();
+	const std::vector<std::shared_ptr<GameObject>>& gameObjects = scene->GetGameObjects();
+
+	const glm::mat4x4& projViewMatrix = scene->GetProjViewMatrix();
+
+	for (const auto& gameObj : gameObjects)
+	{
+		ShadersManager::Get().GetShader(ShaderType::NormalVisualizer)->SetUniformMatrix4f("u_Model", gameObj->GetTransform());
+		ShadersManager::Get().GetShader(ShaderType::NormalVisualizer)->SetUniformMatrix4f("u_PV", projViewMatrix);
+
+		const std::vector<std::shared_ptr<SubMesh>>& subMeshes = gameObj->GetMesh()->GetSubMeshes();
+
+		for (const auto& submesh : subMeshes)
+		{
+			submesh->m_VertexArray->Bind();
+
+			glDrawElements(GL_TRIANGLES, submesh->m_IndexBuffer->GetCount(), GL_UNSIGNED_INT, (const void*)0);
+		}
+	}
 }
 
 void Renderer::RenderDepth(const std::shared_ptr<Scene>& scene)

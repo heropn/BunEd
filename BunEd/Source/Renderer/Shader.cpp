@@ -3,9 +3,9 @@
 #include <sstream>
 #include <fstream>
 
-Shader::Shader(const std::string& vertexShaderFilePath, const std::string& fragmentShaderFilePath)
+Shader::Shader(const std::string& vertexShaderFilePath, const std::string& fragmentShaderFilePath, const std::string& geometryShaderFilePath)
 {
-	CreateShaderProgram(vertexShaderFilePath, fragmentShaderFilePath);
+	CreateShaderProgram(vertexShaderFilePath, fragmentShaderFilePath, geometryShaderFilePath);
 }
 
 Shader::~Shader()
@@ -68,7 +68,7 @@ void Shader::SetUniformMatrix3f(const std::string& uniformName, const glm::mat3&
 	glUniformMatrix3fv(GetUniformLocation(uniformName), 1, GL_FALSE, glm::value_ptr(matrix));
 }
 
-void Shader::CreateShaderProgram(const std::string& vertexShaderFilePath, const std::string& fragmentShaderFilePath)
+void Shader::CreateShaderProgram(const std::string& vertexShaderFilePath, const std::string& fragmentShaderFilePath, const std::string& geometryShaderFilePath)
 {
 	std::string vertexShaderSource = GetShaderSourceFromFile(vertexShaderFilePath);
 	const char* cStr = vertexShaderSource.c_str();
@@ -82,9 +82,24 @@ void Shader::CreateShaderProgram(const std::string& vertexShaderFilePath, const 
 	glShaderSource(fragmentShader, 1, &cStr, nullptr);
 	CompileShader(fragmentShader);
 
+	uint32_t geometryShader = 0;
+	if (!geometryShaderFilePath.empty())
+	{
+		std::string geometryShaderSource = GetShaderSourceFromFile(geometryShaderFilePath);
+		cStr = geometryShaderSource.c_str();
+		geometryShader = glCreateShader(GL_GEOMETRY_SHADER);
+		glShaderSource(geometryShader, 1, &cStr, nullptr);
+		CompileShader(geometryShader);
+	}
+
 	m_ID = glCreateProgram();
 	glAttachShader(m_ID, vertexShader);
 	glAttachShader(m_ID, fragmentShader);
+
+	if (geometryShader > 0)
+	{
+		glAttachShader(m_ID, geometryShader);
+	}
 
 	glLinkProgram(m_ID);
 
@@ -100,6 +115,12 @@ void Shader::CreateShaderProgram(const std::string& vertexShaderFilePath, const 
 
 	glDetachShader(m_ID, vertexShader);
 	glDetachShader(m_ID, fragmentShader);
+
+	if (geometryShader > 0)
+	{
+		glDetachShader(m_ID, geometryShader);
+		glDeleteShader(geometryShader);
+	}
 
 	glDeleteShader(vertexShader);
 	glDeleteShader(fragmentShader);

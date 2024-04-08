@@ -12,11 +12,12 @@ void ShadersManager::Init()
 	AddShader(ShaderType::StencilOutlinePP, "Assets/Shaders/StencilOutlinePP.vs", "Assets/Shaders/StencilOutlinePP.ps");
 	AddShader(ShaderType::SkyBox, "Assets/Shaders/SkyBox.vs", "Assets/Shaders/SkyBox.ps");
 	AddShader(ShaderType::EnviromentMapping, "Assets/Shaders/EnviromentMapping.vs", "Assets/Shaders/EnviromentMapping.ps");
+	AddShader(ShaderType::NormalVisualizer, "Assets/Shaders/NormalVisualize.vs", "Assets/Shaders/NormalVisualize.ps", "Assets/Shaders/NormalVisualize.gs");
 }
 
-void ShadersManager::AddShader(const ShaderType type, const std::string& vertexShaderFilePath, const std::string& fragmentShaderFilePath)
+void ShadersManager::AddShader(const ShaderType type, const std::string& vertexShaderFilePath, const std::string& fragmentShaderFilePath, const std::string& geometryShaderFilePath)
 {
-	m_ShadersMap[type] = std::make_shared<Shader>(vertexShaderFilePath, fragmentShaderFilePath);
+	m_ShadersMap[type] = std::make_shared<Shader>(vertexShaderFilePath, fragmentShaderFilePath, geometryShaderFilePath);
 }
 
 std::shared_ptr<Shader> ShadersManager::GetShader(const ShaderType type)
