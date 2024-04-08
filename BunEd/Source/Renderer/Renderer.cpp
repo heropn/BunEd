@@ -64,9 +64,9 @@ bool Renderer::Init(int width, int height)
 
 	m_LightsUniformBuffer = std::make_unique<UniformBuffer>(nullptr,
 		  sizeof(DirectionalLight::DirectionalLightData)
-		/*+ 4 * sizeof(PointLight::PointLightData)
+		+ 4 * sizeof(PointLight::PointLightData)
 		+ 4 * sizeof(SpotLight::SpotLightData)
-		+ 4 * sizeof(int)*/);
+		+ 4 * sizeof(int));
 	m_LightsUniformBuffer->Bind(0);
 
 	return true;
@@ -217,57 +217,6 @@ void Renderer::RenderGameObject(const std::shared_ptr<GameObject>& gameObj, cons
 	m_SkyBoxTexture->Bind(3);
 
 	UpdateLightsUniformBuffer(lightData);
-	m_LightsUniformBuffer->Bind(0);
-
-	if (lightData.m_DirLight.isEnabled())
-	{
-		//shader->SetUniform3f("u_DirLight.m_Color.m_Ambient", lightData.m_DirLight.m_Data.m_Color.m_Ambient);
-		//shader->SetUniform3f("u_DirLight.m_Color.m_Diffuse", lightData.m_DirLight.m_Data.m_Color.m_Diffuse);
-		//shader->SetUniform3f("u_DirLight.m_Color.m_Specular", lightData.m_DirLight.m_Data.m_Color.m_Specular);
-		//shader->SetUniform3f("u_DirLight.m_Direction", lightData.m_DirLight.m_Data.m_Direction);
-	}
-	else
-	{
-		//shader->SetUniform3f("u_DirLight.m_Ambient", glm::zero<glm::vec3>());
-		//shader->SetUniform3f("u_DirLight.m_Diffuse", glm::zero<glm::vec3>());
-		//shader->SetUniform3f("u_DirLight.m_Specular", glm::zero<glm::vec3>());
-	}
-
-	int pointLightsEnabledCount = 0;
-	for (int i = 0; i < SceneLightData::MAX_LIGHTS; i++)
-	{
-		const PointLight& pointLight = lightData.m_PointLights[i];
-		if (pointLight.isEnabled())
-		{
-			shader->SetUniform3f(std::format("u_PointLights[{}].m_Color.m_Ambient", pointLightsEnabledCount), pointLight.m_Data.m_Color.m_Ambient);
-			shader->SetUniform3f(std::format("u_PointLights[{}].m_Color.m_Diffuse", pointLightsEnabledCount), pointLight.m_Data.m_Color.m_Diffuse);
-			shader->SetUniform3f(std::format("u_PointLights[{}].m_Color.m_Specular", pointLightsEnabledCount), pointLight.m_Data.m_Color.m_Specular);
-			shader->SetUniform3f(std::format("u_PointLights[{}].m_Position", pointLightsEnabledCount), pointLight.m_Data.m_Position);
-			shader->SetUniform3f(std::format("u_PointLights[{}].m_Attenuation", pointLightsEnabledCount), pointLight.m_Data.m_Attenuation);
-			pointLightsEnabledCount++;
-		}
-	}
-
-	shader->SetUniform1i("u_PointLightsEnabledCount", pointLightsEnabledCount);
-
-	int spotLightsEnabledCount = 0;
-	for (int i = 0; i < SceneLightData::MAX_LIGHTS; i++)
-	{
-		const SpotLight& spotLight = lightData.m_SpotLights[i];
-		if (spotLight.isEnabled())
-		{
-			shader->SetUniform3f(std::format("u_SpotLights[{}].m_Color.m_Ambient", spotLightsEnabledCount), spotLight.m_Data.m_Color.m_Ambient);
-			shader->SetUniform3f(std::format("u_SpotLights[{}].m_Color.m_Diffuse", spotLightsEnabledCount), spotLight.m_Data.m_Color.m_Diffuse);
-			shader->SetUniform3f(std::format("u_SpotLights[{}].m_Color.m_Specular", spotLightsEnabledCount), spotLight.m_Data.m_Color.m_Specular);
-			shader->SetUniform3f(std::format("u_SpotLights[{}].m_Position", spotLightsEnabledCount), spotLight.m_Data.m_Position);
-			shader->SetUniform3f(std::format("u_SpotLights[{}].m_Direction", spotLightsEnabledCount), spotLight.m_Data.m_Direction);
-			shader->SetUniform1f(std::format("u_SpotLights[{}].m_InnerCutOffAngleCos", spotLightsEnabledCount), spotLight.m_Data.m_InnerCutOffAngleCos);
-			shader->SetUniform1f(std::format("u_SpotLights[{}].m_OuterCutOffAngleCos", spotLightsEnabledCount), spotLight.m_Data.m_OuterCutOffAngleCos);
-			spotLightsEnabledCount++;
-		}
-	}
-
-	shader->SetUniform1i("u_SpotLightsEnabledCount", spotLightsEnabledCount);
 
 	const std::vector<std::shared_ptr<SubMesh>>& subMeshes = gameObj->GetMesh()->GetSubMeshes();
 
@@ -387,21 +336,32 @@ void Renderer::CreateSkyBoxData()
 
 void Renderer::UpdateLightsUniformBuffer(const SceneLightData& lightData)
 {
-	m_LightsUniformBuffer->UpdateBufferData(0, sizeof(DirectionalLight::DirectionalLightData), &lightData.m_DirLight);
-	//m_LightsUniformBuffer->UpdateBufferData(sizeof(DirectionalLight::DirectionalLightData), 4 * sizeof(PointLight::PointLightData), lightData.m_PointLights);
-	//m_LightsUniformBuffer->UpdateBufferData(sizeof(DirectionalLight::DirectionalLightData)
-	//	+ 4 * sizeof(PointLight::PointLightData),
-	//	4 * sizeof(SpotLight::SpotLightData), lightData.m_SpotLights);
-	//
-	//int enabledLightsData[4] = {
-	//	lightData.m_DirLight.isEnabled(), // Direction Light enabled
-	//	0, // PointLightsEnabledCount
-	//	0, // SpotLightsEnabledCount
-	//	0 // Padding
-	//};
+	int offset = 0;
+	m_LightsUniformBuffer->UpdateBufferData(offset, sizeof(DirectionalLight::DirectionalLightData), &lightData.m_DirLight.m_Data);
+	offset += sizeof(DirectionalLight::DirectionalLightData);
 
-	//m_LightsUniformBuffer->UpdateBufferData(sizeof(DirectionalLight::DirectionalLightData)
-	//	+ 4 * sizeof(PointLight::PointLightData)
-	//	+ 4 * sizeof(SpotLight::SpotLightData),
-	//	sizeof(enabledLightsData), enabledLightsData);
+	int pointLightsEnabledCount = 0;
+	for (int i = 0; i < SceneLightData::MAX_LIGHTS; i++)
+	{
+		m_LightsUniformBuffer->UpdateBufferData(offset, sizeof(PointLight::PointLightData), &lightData.m_PointLights[i].m_Data);
+		offset += sizeof(PointLight::PointLightData);
+		pointLightsEnabledCount += lightData.m_PointLights[i].isEnabled() ? 1 : 0;
+	}
+
+	int spotLightsEnabledCount = 0;
+	for (int i = 0; i < SceneLightData::MAX_LIGHTS; i++)
+	{
+		m_LightsUniformBuffer->UpdateBufferData(offset, sizeof(SpotLight::SpotLightData), &lightData.m_SpotLights[i].m_Data);
+		offset += sizeof(SpotLight::SpotLightData);
+		spotLightsEnabledCount += lightData.m_SpotLights[i].isEnabled() ? 1 : 0;
+	}
+	
+	int enabledLightsData[4] = {
+		lightData.m_DirLight.isEnabled(), // Direction Light enabled
+		pointLightsEnabledCount, // PointLightsEnabledCount
+		spotLightsEnabledCount, // SpotLightsEnabledCount
+		0 // Padding
+	};
+
+	m_LightsUniformBuffer->UpdateBufferData(offset, sizeof(enabledLightsData), enabledLightsData);
 }

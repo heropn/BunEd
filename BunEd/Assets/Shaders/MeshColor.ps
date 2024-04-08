@@ -129,20 +129,13 @@ uniform Material u_Material;
 layout(std140, binding = 0) uniform LightsData
 {
 	DirectionalLight u_DirLight;
-	//PointLight u_PointLights[MAX_LIGHTS];
-	//SpotLight u_SpotLights[MAX_LIGHTS];
-	//int u_DirLightEnabled;
-	//int u_PointLightsEnabledCount;
-	//int u_SpotLightsEnabledCount;
-	//int u_pad1;
+	PointLight u_PointLights[MAX_LIGHTS];
+	SpotLight u_SpotLights[MAX_LIGHTS];
+	int u_DirLightEnabled;
+	int u_PointLightsEnabledCount;
+	int u_SpotLightsEnabledCount;
+	int u_pad1;
 };
-
-
-//uniform DirectionalLight u_DirLight;
-uniform PointLight u_PointLights[MAX_LIGHTS];
-uniform int u_PointLightsEnabledCount;
-uniform SpotLight u_SpotLights[MAX_LIGHTS];
-uniform int u_SpotLightsEnabledCount;
 
 uniform vec3 u_EyePos;
  
@@ -155,12 +148,12 @@ void main()
 
 	for (int i = 0; i < u_PointLightsEnabledCount; i++)
 	{
-		//lightColor += ComputePointLight(u_Material, u_PointLights[i], fs_in.v_FragPos, fs_in.v_Normal, toEye);
+		lightColor += ComputePointLight(u_Material, u_PointLights[i], fs_in.v_FragPos, fs_in.v_Normal, toEye);
 	}
 
 	for (int i = 0; i < u_SpotLightsEnabledCount; i++)
 	{
-		//lightColor += ComputeSpotLight(u_Material, u_SpotLights[i], fs_in.v_FragPos, fs_in.v_Normal, toEye);
+		lightColor += ComputeSpotLight(u_Material, u_SpotLights[i], fs_in.v_FragPos, fs_in.v_Normal, toEye);
 	}
 
 	o_FragmentColor = u_Material.m_Color * vec4(lightColor, 1.0f);
