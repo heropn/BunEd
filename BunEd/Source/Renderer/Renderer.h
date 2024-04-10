@@ -47,6 +47,7 @@ private:
 	static Renderer s_Instance;
 
 	std::shared_ptr<FrameBuffer> m_OffScreenFrameBuffer = nullptr;
+	std::shared_ptr<FrameBuffer> m_AntiAliasedFrameBuffer = nullptr;
 
 	std::unique_ptr<VertexBuffer> m_ScreenVertexBuffer = nullptr;
 	std::unique_ptr<IndexBuffer> m_ScreenIndexBuffer = nullptr;
@@ -58,6 +59,11 @@ private:
 	std::unique_ptr<VertexArray> m_SkyboxVertexArray = nullptr;
 
 	std::unique_ptr<UniformBuffer> m_LightsUniformBuffer = nullptr;
+
+	int32_t m_OffScreenMultiSampleCount = 4;
+
+	int32_t m_Width = 0;
+	int32_t m_Height = 0;
 
 	bool m_VisualizeDepth = false;
 	bool m_VisualizeNormals = false;

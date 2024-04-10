@@ -46,6 +46,8 @@ bool Renderer::Init(int width, int height)
 	glDebugMessageCallback(MessageCallback, nullptr);
 #endif
 
+	glEnable(GL_MULTISAMPLE);
+
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
 
@@ -108,17 +110,21 @@ void Renderer::Render(const std::shared_ptr<Scene>& scene)
 	glDrawElements(GL_TRIANGLES, m_SkyboxIndexBuffer->GetCount(), GL_UNSIGNED_INT, (const void*)0);
 	m_SkyBoxTexture->Unbind();
 
+	m_OffScreenFrameBuffer->Bind(GL_READ_FRAMEBUFFER);
+	m_AntiAliasedFrameBuffer->Bind(GL_DRAW_FRAMEBUFFER);
+	glBlitFramebuffer(0, 0, m_Width, m_Height, 0, 0, m_Width, m_Height, GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, GL_NEAREST);
+
 	m_OffScreenFrameBuffer->Unbind();
 
 	// Post process
 	ShadersManager::Get().GetShader(ShaderType::StencilOutlinePP)->Bind();
 	m_ScreenVertexArray->Bind();
-	m_OffScreenFrameBuffer->GetColorBufferTexture()->Bind(0);
-	glBindTextureUnit(1, m_OffScreenFrameBuffer->GetStencilBufferTextureViewId());
+	m_AntiAliasedFrameBuffer->GetColorBufferTexture()->Bind(0);
+	glBindTextureUnit(1, m_AntiAliasedFrameBuffer->GetStencilBufferTextureViewId());
 
 	glDrawElements(GL_TRIANGLES, m_ScreenIndexBuffer->GetCount(), GL_UNSIGNED_INT, (const void*)0);
 
-	m_OffScreenFrameBuffer->GetColorBufferTexture()->Unbind();
+	m_AntiAliasedFrameBuffer->GetColorBufferTexture()->Unbind();
 	glBindTextureUnit(1, 0);
 }
 
@@ -135,9 +141,13 @@ void Renderer::SwapBuffers()
 
 void Renderer::ChangeViewportSize(int width, int height)
 {
-	glViewport(0, 0, width, height);
+	m_Width = width;
+	m_Height = height;
 
-	m_OffScreenFrameBuffer = FrameBuffer::CreateColorDepthStencilFrameBuffer(width, height);
+	glViewport(0, 0, m_Width, m_Height);
+
+	m_OffScreenFrameBuffer = FrameBuffer::CreateColorDepthStencilFrameBuffer(m_Width, m_Height, m_OffScreenMultiSampleCount);
+	m_AntiAliasedFrameBuffer = FrameBuffer::CreateColorDepthStencilFrameBuffer(m_Width, m_Height);
 }
 
 void Renderer::RenderScene(const std::shared_ptr<Scene>& scene)

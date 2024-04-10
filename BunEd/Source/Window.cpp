@@ -10,6 +10,8 @@ bool Window::Init()
 		return false;
 	}
 
+	glfwWindowHint(GLFW_SAMPLES, 4);
+
 	m_GLFWWindow = glfwCreateWindow(m_Width, m_Height, "BunEd", NULL, NULL);
 	if (!m_GLFWWindow)
 	{

@@ -41,11 +41,12 @@ Texture2D::Texture2D(const std::string& filePath)
 	}
 }
 
-Texture2D::Texture2D(int32_t width, int32_t height, int32_t format)
+Texture2D::Texture2D(int32_t width, int32_t height, int32_t format, int32_t multisampleCount)
 {
 	m_Width = width;
 	m_Height = height;
 	m_Format = format;
+	m_MultisampleCount = multisampleCount;
 
 	GenerateTexture(nullptr);
 }
@@ -70,7 +71,7 @@ void Texture2D::Unbind()
 void Texture2D::GenerateTexture(const unsigned char* data)
 {
 	glGenTextures(1, &m_ID);
-	glBindTexture(GL_TEXTURE_2D, m_ID);
+	glBindTexture(m_MultisampleCount > 1 ? GL_TEXTURE_2D_MULTISAMPLE : GL_TEXTURE_2D, m_ID);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -79,12 +80,25 @@ void Texture2D::GenerateTexture(const unsigned char* data)
 	
 	if (m_Format == GL_DEPTH24_STENCIL8)
 	{
-		glTexStorage2D(GL_TEXTURE_2D, 1, m_Format, m_Width, m_Height);
+		if (m_MultisampleCount > 1)
+		{
+			glTexStorage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, m_MultisampleCount, m_Format, m_Width, m_Height, GL_TRUE);
+		}
+		else
+		{
+			glTexStorage2D(GL_TEXTURE_2D, 1, m_Format, m_Width, m_Height);
+		}
 	}
 	else
 	{
-		glTexImage2D(GL_TEXTURE_2D, 0, m_Format, m_Width, m_Height, 0, m_Format, GL_UNSIGNED_BYTE, data);
-
+		if (m_MultisampleCount > 1)
+		{
+			glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, m_MultisampleCount, m_Format, m_Width, m_Height, GL_TRUE);
+		}
+		else
+		{
+			glTexImage2D(GL_TEXTURE_2D, 0, m_Format, m_Width, m_Height, 0, m_Format, GL_UNSIGNED_BYTE, data);
+		}
 	}
 
 	//glGenerateMipmap(GL_TEXTURE_2D);

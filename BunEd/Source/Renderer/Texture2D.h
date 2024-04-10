@@ -6,7 +6,7 @@ class Texture2D
 public:
 
 	Texture2D(const std::string& filePath);
-	Texture2D(int32_t width, int32_t height, int32_t format);
+	Texture2D(int32_t width, int32_t height, int32_t format, int32_t multisampleCount = 1);
 	~Texture2D();
 
 	void Bind(int32_t index);
@@ -26,5 +26,7 @@ private:
 	int32_t m_Width = 0;
 	int32_t m_Format = 0;
 	int32_t m_BoundIndex = -1;
+	int32_t m_MultisampleCount = 1;
+
 	uint32_t m_ID = 0;
 };

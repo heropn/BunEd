@@ -15,7 +15,7 @@ public:
 	TexturesManager(const TexturesManager&) = delete;
 	TexturesManager& operator=(const TexturesManager&) = delete;
 
-	std::shared_ptr<Texture2D> CreateTexture2D(int32_t width, int32_t height, int32_t format);
+	std::shared_ptr<Texture2D> CreateTexture2D(int32_t width, int32_t height, int32_t format, int32_t multisampleCount = 1);
 	std::shared_ptr<Texture2D> FindOrCreateTexture2D(const std::string& filePath);
 	std::shared_ptr<Texture2D> FindTexture2D(const std::string& filePath);
 

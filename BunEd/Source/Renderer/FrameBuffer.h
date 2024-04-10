@@ -20,9 +20,9 @@ public:
 
 	~FrameBuffer();
 
-	static std::shared_ptr<FrameBuffer> CreateColorDepthStencilFrameBuffer(int32_t width, int32_t height);
+	static std::shared_ptr<FrameBuffer> CreateColorDepthStencilFrameBuffer(int32_t width, int32_t height, int32_t multiSampleCount = 1);
 
-	void Bind() const;
+	void Bind(uint32_t target = GL_FRAMEBUFFER) const;
 	void Unbind() const;
 
 	const std::shared_ptr<Texture2D>& GetColorBufferTexture() const { return m_ColorBuffer; }
